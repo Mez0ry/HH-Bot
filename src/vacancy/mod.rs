@@ -14,8 +14,8 @@ pub mod vacancy {
         }
 
         pub async fn update_vacancy_fields(&mut self, driver : &WebDriver){
-            let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"]";
-            let button_res = driver.find(By::Css(respond_button_selector)).await;
+            let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]";
+            let button_res = self.vacancy_element.find(By::Css(respond_button_selector)).await;
 
             match button_res{
                 Ok(button_element)=>{ 
@@ -45,10 +45,11 @@ pub mod vacancy {
         }
 
         pub async fn click_respond(&self){
-            let is_displayed = async |_element : &Vacancy| -> bool {
+            
+            let is_clickable = async |_element : &Vacancy| -> bool {
                 match &self.respond_button {
                     Some(elem) => {
-                        let success = elem.is_displayed().await;
+                        let success = elem.is_clickable().await;
                         Some(success);
                     },
                     None => {},
@@ -56,15 +57,18 @@ pub mod vacancy {
                 false
             };
 
-            if self.respond_button.is_some() && is_displayed(&self).await{
-                let click = self.respond_button.as_ref().unwrap().click().await;
-                match click {
-                    Ok(_) =>{
-                        println!("Respond button clicked");
-                    },
-                    Err(_)=>{
-                        println!("Respond button wasnt clicked");
-                    }
+            if self.respond_button.is_some(){
+                let button = self.respond_button.as_ref().unwrap();
+
+                if is_clickable(&self).await{
+
+                }
+
+                let click_result = button.click().await;
+
+                match click_result {
+                    Ok(_) => println!("Respond button clicked"),
+                    Err(e) => eprintln!("Failed to click button: {:?}", e),
                 };
 
             }
@@ -83,17 +87,31 @@ pub mod vacancy {
             &self.vacancy_element
         }
 
-        pub async fn get_button(&self) -> &WebElement{
-
+        pub async fn get_button(&self) -> Option<&WebElement>{
              match &self.respond_button {
                 Some(element)=>{
-                    return element
+                    return Some(element)
                 },
                 None => {
-                    panic!("Couldnt get button");
+                    None
                 }
             }
         }
 
+        pub async fn get_href(&self) -> String{
+            let button = self.get_button().await;
+            let href = button.unwrap().attr("href").await;
+
+            match href {
+                Ok(element)=>{
+                    let actual_href = element.is_some().to_string();
+                    return actual_href;
+                },
+                Err(_)=>{
+                   println!("Failed to get href");
+                   return String::new();
+                }
+            }
+        }
     }
 }

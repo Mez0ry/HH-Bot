@@ -13,7 +13,9 @@ pub mod cookie_manager {
         pub async fn load_cookies(path: &String) -> Result<Option<Vec<Cookie>>, WebDriverError> {
             let cookies = CookieManager::parse_cookies(path).await;
             match cookies {
-                Ok(ref _data) => println!("Cookies successfully parsed"),
+                Ok(ref _data) => {
+                    println!("Cookies successfully parsed");
+                },
                 Err(ref err) => println!("error is:  {}", err),
             }
 
@@ -39,11 +41,19 @@ pub mod cookie_manager {
         pub async fn parse_cookies(path: &String) -> Result<Option<Vec<Cookie>>, WebDriverError> {
             let str_as_path = std::path::Path::new(&path);
             if !str_as_path.exists() || str_as_path.is_dir() {
-                return Ok(None);
+                return Err(WebDriverError::InvalidArgument(WebDriverErrorInfo::new(
+                    "path doesnt exists or is directory".to_string(),
+                )));
             }
 
             let content = std::fs::read_to_string(&str_as_path)?;
             let parsed_cookies: Vec<Cookie> = serde_json::from_str(&content)?;
+
+            if parsed_cookies.is_empty(){
+                return Err(WebDriverError::InvalidArgument(WebDriverErrorInfo::new(
+                    "couldnt parse cookies they're empty".to_string(),
+                )));
+            }
 
             Ok(Some(parsed_cookies))
         }
