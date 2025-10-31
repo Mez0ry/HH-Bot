@@ -13,7 +13,7 @@ pub mod vacancy {
             Self {title : None , respond_button : None, vacancy_element: vacancy}
         }
 
-        pub async fn update_vacancy_fields(&mut self, driver : &WebDriver){
+        pub async fn update_vacancy_fields(&mut self){
             let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]";
             let button_res = self.vacancy_element.find(By::Css(respond_button_selector)).await;
 

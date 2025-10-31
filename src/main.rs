@@ -1,10 +1,6 @@
 use std::{collections::HashSet};
 use thirtyfour::prelude::*;
 
-use tokio::stream;
-use futures;
-use futures::stream::{StreamExt, TryStreamExt};
-
 pub mod cookie_manager;
 pub mod vacancy;
 
@@ -76,7 +72,7 @@ async fn main() -> Result<(), ThirtyFourError> {
     
     for vacancy_element in &all_vacancies{
         let mut vacancy = Vacancy::new(vacancy_element.clone());
-        vacancy.update_vacancy_fields(&driver).await;
+        vacancy.update_vacancy_fields().await;
 
         vacancies_vec.push(vacancy);
     }
@@ -240,7 +236,7 @@ async fn main() -> Result<(), ThirtyFourError> {
             
             for vacancy_element in &all_vacancies{
                 let mut vacancy = Vacancy::new(vacancy_element.clone());
-                vacancy.update_vacancy_fields(&driver).await;
+                vacancy.update_vacancy_fields().await;
                 
                 let respond_button = vacancy.get_button().await;
 
