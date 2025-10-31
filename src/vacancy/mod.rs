@@ -16,13 +16,12 @@ pub mod vacancy {
         pub async fn update_vacancy_fields(&mut self){
             let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]";
             let button_res = self.vacancy_element.find(By::Css(respond_button_selector)).await;
-
+            
             match button_res{
                 Ok(button_element)=>{ 
                     self.respond_button = Some(button_element);
-                    println!("button found");
                 },
-                Err(err)=>{println!("button wasnt found, error: {}", err);}
+                Err(err)=>{dbg!("button wasnt found, error: {}", err);}
             }
 
             let vacancy_title_selector = "[data-qa=\"serp-item__title-text\"]";
@@ -32,14 +31,11 @@ pub mod vacancy {
                     let title_text= vacancy_title_element.text().await;
                     match title_text {
                         Ok(actual_title)=>{self.title = Some(actual_title);},
-                        Err(err)=>{println!("For vacancy title wasn't found, error: {}", err);}
+                        Err(err)=>{dbg!("For vacancy title wasn't found, error: {}", err);}
                     }
-
-       
-                    println!("vacancy title: {}", self.title.clone().unwrap());
                 },
                 Err(err)=>{
-                    println!("parent_element wasnt found: {}", err);
+                    dbg!("parent_element wasnt found: {}", err);
                 }
             }
         }
