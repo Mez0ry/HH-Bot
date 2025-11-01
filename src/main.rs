@@ -72,12 +72,11 @@ async fn main() -> Result<(), ThirtyFourError> {
 
     let css_strategy = |selector: &str| By::Css(selector.to_owned());
     
-    
     loop{
         let mut reached_limit = false;
 
         for vacancy in &vacancies_vec{
-            dbg!("Handling vacancy: title: {}", vacancy.get_title().await);
+            println!("Handling vacancy: title: {}", vacancy.get_title().await);
             let respond_button = vacancy.get_button().await;
 
             if respond_button.is_none(){
@@ -89,7 +88,6 @@ async fn main() -> Result<(), ThirtyFourError> {
             let button_href = respond_button.attr("href").await?;
 
             if button_href.clone().is_some_and(|href| responded_buttons_set.contains(&href)){
-                dbg!("already responded on this vacancy {}", button_href.as_ref().unwrap());
                 continue;
             }
 
@@ -98,7 +96,6 @@ async fn main() -> Result<(), ThirtyFourError> {
 
             let limit_check = ElementAction::new(&driver, "[class=\"bloko-translate-guard\"]",&css_strategy);
             if ElementAction::try_exists(&limit_check, 3).await?{
-                println!("reached");
                 reached_limit = true;
                 break;
             }
@@ -144,9 +141,9 @@ async fn main() -> Result<(), ThirtyFourError> {
                 match button_href{
                     Some(href) => {
                         responded_buttons_set.insert(href.to_string());
-                        dbg!("Added vacancy to responded set, href{}", href);
+                        println!("Added vacancy to responded set. Title:{}, href: {},", vacancy.get_title().await, href);
                     },
-                    None => {dbg!("button_href None");}
+                    None => {}
                 }
             }
 
@@ -154,7 +151,6 @@ async fn main() -> Result<(), ThirtyFourError> {
 
             if current_url.as_str() != target_url {
                 if ElementAction::try_exists(&limit_check, 3).await?{
-                    println!("reached");
                     reached_limit = true;
                     break;
                 }
@@ -162,8 +158,6 @@ async fn main() -> Result<(), ThirtyFourError> {
                 driver.goto(target_url).await?;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 break;
-            } else {
-                dbg!("Already on desired page, skipping navigation");
             }
         }// !vacancies
         
@@ -204,7 +198,6 @@ async fn main() -> Result<(), ThirtyFourError> {
             println!("You reached limit");
             break;
         }
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     }// !loop
 
     CookieManager::save_cookies(cookie_json_path, driver.get_all_cookies().await?).await?;
