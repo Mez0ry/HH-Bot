@@ -76,13 +76,10 @@ impl<'a> ElementAction<'a> {
     }
 
     pub async fn try_safe_click(action: &ElementAction<'_>, retries: u32) -> Result<(), WebDriverError>{
-        let mut last_error = None;
-
         for attempt in 1..= retries {
             match action.safe_click().await {
                 Ok(_) => (),
-                Err(e) => {
-                    last_error = Some(e);
+                Err(_) => {
                     dbg!("safe_click attempt {}", attempt);
                     if attempt < retries {
                         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
