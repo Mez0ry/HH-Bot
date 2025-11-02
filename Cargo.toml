@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 futures-retry = "0.6.0"
+serde = "1.0.228"
 serde_json = "1.0.145"
 thirtyfour = "0.36.1"
 tokio = { version = "1", features = ["full"] }

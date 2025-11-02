@@ -1,0 +1,12 @@
+[
+    {"vacancy": "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]", "type": "css"},
+    {"vacancy_title": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
+    {"vacancy_respond": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
+    {"relocation_popup": "[data-qa=\"relocation-warning-confirm\"]", "type": "css"},
+    {"accept_cookies": "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]", "type": "css"},
+    {"submit_button": "[data-qa=\"vacancy-response-submit-popup\"]", "type": "css"},
+    {"response_letter_toggle": "[data-qa=\"vacancy-response-letter-toggle\"]", "type": "css"},
+    {"response_popup_letter_form": "[data-qa=\"vacancy-response-popup-form-letter-input\"]", "type": "css"},
+
+    {"vacancy_limit_reached": "[class=\"bloko-translate-guard\"]", "type": "css"}
+]

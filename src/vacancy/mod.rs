@@ -1,6 +1,6 @@
 pub mod vacancy {
     use thirtyfour::prelude::*;
-
+    
     #[derive(Debug, Clone)]
     pub struct Vacancy{
         title : Option<String>,
@@ -8,7 +8,7 @@ pub mod vacancy {
         button_href : String,
         vacancy_element : WebElement
     }
-
+    
     impl PartialEq for Vacancy {
         fn eq(&self, other: &Self) -> bool {
             self.title == other.title && self.button_href == other.button_href
@@ -19,7 +19,7 @@ pub mod vacancy {
         pub fn new(vacancy : WebElement) -> Self {
             Self {title : None , respond_button : None, button_href : String::new(), vacancy_element: vacancy}
         }
-
+        
         pub async fn update_vacancy_fields(&mut self){
             let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]";
             let button_res = self.vacancy_element.find(By::Css(respond_button_selector)).await;
@@ -71,7 +71,7 @@ pub mod vacancy {
                 let button = self.respond_button.as_ref().unwrap();
 
                 if is_clickable(&self).await{
-
+                    //??? XDDD
                 }
 
                 let click_result = button.click().await;

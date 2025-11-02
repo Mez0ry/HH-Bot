@@ -276,6 +276,7 @@ name = "hh_bot"
 version = "0.1.0"
 dependencies = [
  "futures-retry",
+ "serde",
  "serde_json",
  "thirtyfour",
  "tokio",

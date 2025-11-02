@@ -1,11 +1,12 @@
 use std::{collections::HashSet};
-use thirtyfour::prelude::*;
+use thirtyfour::{prelude::*};
 
 pub mod cookie_manager;
 pub mod vacancy;
 pub mod element_action;
+pub mod selector;
 
-use crate::{cookie_manager::cookie_manager::CookieManager, element_action::ElementAction, vacancy::vacancy::Vacancy};
+use crate::{cookie_manager::cookie_manager::CookieManager, element_action::ElementAction, selector::MySelector, vacancy::vacancy::Vacancy};
 
 type ThirtyFourError = thirtyfour::error::WebDriverError; // Исправили тип ошибки
 
@@ -52,6 +53,15 @@ async fn main() -> Result<(), ThirtyFourError> {
 
     driver.refresh().await?;
 
+    // selectors
+    let content = std::fs::read_to_string("./resources/selectors.json".to_string())?;
+    let selectors: Vec<MySelector> = serde_json::from_str(&content)?;
+    
+    for sel in selectors {
+        println!("selector: {}, type: {}", sel.get_selector().await, sel.clone().get_type().await.to_string());
+    }
+
+    // !selectors
     let mut responded_buttons_set: HashSet<String> = std::collections::HashSet::new();
 
     let vacancy_selector = "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]";
@@ -114,7 +124,7 @@ async fn main() -> Result<(), ThirtyFourError> {
                 
                 ElementAction::try_safe_click(&submit_button,3).await?;
 
-                let response_letter_toggle = ElementAction::new(&driver, "[data-qa=\"vacancy-response-letter-toggle\"", &css_strategy);
+                let response_letter_toggle = ElementAction::new(&driver, "[data-qa=\"vacancy-response-letter-toggle\"]", &css_strategy);
                 
                 if ElementAction::try_exists(&response_letter_toggle, 3).await?{
 
@@ -135,27 +145,6 @@ async fn main() -> Result<(), ThirtyFourError> {
 
                     }
                 }
-                
-                // let last_vacancy = vacancies_vec.iter().last();
-
-                // if last_vacancy.is_some(){
-                //     if vacancy == last_vacancy.unwrap(){
-                //         println!("vacancy == last_vacancy.unwrap(): Title:{}, href: {}", vacancy.get_title().await, &href);
-
-                //         let page_next = ElementAction::new(&driver, "[data-qa=\"pager-next\"]",&css_strategy);
-                //         if ElementAction::try_exists(&page_next, 3).await?{
-                //             ElementAction::try_safe_click(&page_next,3).await?;
-                            
-                //             let url  = driver.current_url().await?;
-                //             target_url = url.clone().to_string();
-                //             driver.goto(&target_url).await?;
-                //             tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-                //             println!("Changed target url on next page, target_url {}, curr_url: {}", &target_url, url);
-                            
-                //         }
-
-                //     }
-                // }
 
                 responded_buttons_set.insert(href.clone());
                 println!("Handled Vacancy: Title:{}, href: {}", vacancy.get_title().await, &href);
@@ -180,32 +169,8 @@ async fn main() -> Result<(), ThirtyFourError> {
 
         let vacancies_on_page = 50 + 1;
         let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
-        
-        if !all_vacancies.is_empty(){
-            all_vacancies.iter().next_back().unwrap().wait_until().clickable().await?;
-            vacancies_vec.clear();
-            
-            let vacancies_on_page = 50 + 1;
-            let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
 
-            for vacancy_element in all_vacancies.iter().skip(elements_to_skip){
-                let mut vacancy = Vacancy::new(vacancy_element.clone());
-                vacancy.update_vacancy_fields().await;
-                
-                let respond_button = vacancy.get_button().await;
-                let title =vacancy.get_title().await;
-                let href = vacancy.get_href().await;
-
-                if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
-                    println!("Skipping vacancy with no button/title/href or already responded on it");
-                    continue;
-                }
-                
-                vacancies_vec.push(vacancy);
-            }
-        }
-
-        if vacancies_vec.is_empty(){
+        if elements_to_skip == vacancies_on_page - 1{
             println!("Vacancies are empty");
 
             let page_next = ElementAction::new(&driver, "[data-qa=\"pager-next\"]",&css_strategy);
@@ -222,8 +187,33 @@ async fn main() -> Result<(), ThirtyFourError> {
             }
         }
 
+        all_vacancies.iter().next_back().unwrap().wait_until().clickable().await?;
+
+        if !all_vacancies.is_empty(){
+            vacancies_vec.clear();
+            
+            let vacancies_on_page = 50 + 1;
+            let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
+
+            for vacancy_element in all_vacancies.iter().skip(elements_to_skip){
+                let mut vacancy = Vacancy::new(vacancy_element.clone());
+                vacancy.update_vacancy_fields().await;
+                
+                let respond_button = vacancy.get_button().await;
+                let title =vacancy.get_title().await;
+                let href = vacancy.get_href().await;
+                
+                if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
+                    println!("Skipping vacancy with no button/title/href or already responded on it");
+                    continue;
+                }
+                
+                vacancies_vec.push(vacancy);
+            }
+        }
+
         if reached_limit{
-            println!("You reached limit");
+            println!("Reached the limit in 200 vacancies");
             break;
         }
     }// !loop

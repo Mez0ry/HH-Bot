@@ -1,13 +1,10 @@
 pub mod cookie_manager {
 
     use std::{fs::File, io::Write};
-    use std::sync::{Mutex};
     use thirtyfour::Cookie;
     use thirtyfour::error::WebDriverErrorInfo;
     use thirtyfour::prelude::*;
     use crate::element_action::{self, ElementAction};
-
-    static ONCE_LOCK: Mutex<Option<()>> = Mutex::new(None);
 
     pub struct CookieManager {
         
@@ -45,21 +42,15 @@ pub mod cookie_manager {
         }
 
         async fn login(driver: &WebDriver) -> Result<(), WebDriverError> {
-            let guard = ONCE_LOCK.lock();
+            let css_strategy = |selector: &str| By::Css(selector.to_owned());
 
-            if guard.is_ok() {
-                let css_strategy = |selector: &str| By::Css(selector.to_owned());
-
-                driver.goto("http://hh.ru/login").await?;
-                let submit_button = element_action::ElementAction::new(driver, "[data-qa=\"submit-button\"]", &css_strategy);
-                
-                if ElementAction::try_exists(&submit_button, 3).await?{
-                    ElementAction::try_safe_click(&submit_button, 3).await?;
-                }
-
-                *guard.unwrap() = Some(());
+            driver.goto("http://hh.ru/login").await?;
+            let submit_button = element_action::ElementAction::new(driver, "[data-qa=\"submit-button\"]", &css_strategy);
+            
+            if ElementAction::try_exists(&submit_button, 3).await?{
+                ElementAction::try_safe_click(&submit_button, 3).await?;
             }
-
+            
             Ok(())
         }
 
