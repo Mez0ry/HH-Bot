@@ -5,12 +5,19 @@ pub mod vacancy {
     pub struct Vacancy{
         title : Option<String>,
         respond_button : Option<WebElement>,
+        button_href : String,
         vacancy_element : WebElement
     }
-    
+
+    impl PartialEq for Vacancy {
+        fn eq(&self, other: &Self) -> bool {
+            self.title == other.title && self.button_href == other.button_href
+        }
+    }
+
     impl Vacancy {
         pub fn new(vacancy : WebElement) -> Self {
-            Self {title : None , respond_button : None, vacancy_element: vacancy}
+            Self {title : None , respond_button : None, button_href : String::new(), vacancy_element: vacancy}
         }
 
         pub async fn update_vacancy_fields(&mut self){
@@ -23,6 +30,13 @@ pub mod vacancy {
                 },
                 Err(err)=>{dbg!("button wasnt found, error: {}", err);}
             }
+
+            match self.get_href().await {
+                Some(href)=>{
+                    self.button_href = href;
+                },
+                None=>{}
+            };
 
             let vacancy_title_selector = "[data-qa=\"serp-item__title-text\"]";
                     
@@ -94,20 +108,28 @@ pub mod vacancy {
             }
         }
 
-        pub async fn get_href(&self) -> String{
+        pub async fn get_href(&self) -> Option<String>{
             let button = self.get_button().await;
-            let href = button.unwrap().attr("href").await;
-
-            match href {
-                Ok(element)=>{
-                    let actual_href = element.is_some().to_string();
-                    return actual_href;
-                },
-                Err(_)=>{
-                   println!("Failed to get href");
-                   return String::new();
+            
+            if button.is_some() {
+                
+                let href = button.unwrap().attr("href").await;
+    
+                match href {
+                    Ok(element)=>{
+                        match element{
+                            Some(href) => return Some(href),
+                            None=>{return None;}
+                        }
+                    },
+                    Err(_)=>{
+                       println!("Failed to get href");
+                       return None;
+                    }
                 }
             }
+
+            return None;
         }
     }
 }

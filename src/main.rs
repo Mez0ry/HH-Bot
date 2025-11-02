@@ -36,17 +36,15 @@ async fn main() -> Result<(), ThirtyFourError> {
     caps.add_arg("--log-level=3")?;
     caps.add_arg("--enable-unsafe-swiftshader")?;
 
-    //class="bloko-translate-guard"
+    let driver = WebDriver::new("http://localhost:57434", caps).await?;
 
-    let driver = WebDriver::new("http://localhost:64876", caps).await?;
+    let mut target_url : String = "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line".to_string();
 
-    let target_url = "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line";
-
-    driver.goto(target_url).await?;
+    driver.goto(&target_url).await?;
     
     let cookie_json_path: String = String::from("./resources/cookies.json");
 
-    if let Some(cookies) = CookieManager::load_cookies(&cookie_json_path).await?{
+    if let Some(cookies) = CookieManager::load_cookies(&cookie_json_path, &driver).await?{
         for cookie in cookies {
             driver.add_cookie(cookie).await?;
         }
@@ -74,22 +72,17 @@ async fn main() -> Result<(), ThirtyFourError> {
     
     loop{
         let mut reached_limit = false;
-
+        
         for vacancy in &vacancies_vec{
             println!("Handling vacancy: title: {}", vacancy.get_title().await);
             let respond_button = vacancy.get_button().await;
+            let href = vacancy.get_href().await;
 
-            if respond_button.is_none(){
+            if respond_button.is_none() || href.is_none() || href.clone().is_some_and(|actual_href|  responded_buttons_set.contains(&actual_href)) {
                 continue;
             }
 
-            let respond_button = respond_button.unwrap();
-
-            let button_href = respond_button.attr("href").await?;
-
-            if button_href.clone().is_some_and(|href| responded_buttons_set.contains(&href)){
-                continue;
-            }
+            let href = href.unwrap();
 
             tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
             vacancy.click_respond().await;
@@ -100,29 +93,35 @@ async fn main() -> Result<(), ThirtyFourError> {
                 break;
             }
 
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
             let relocation_popup = ElementAction::new(&driver, "[data-qa=\"relocation-warning-confirm\"]", &css_strategy);
 
             if ElementAction::try_exists(&relocation_popup, 3).await?{
-                //relocation_popup.safe_click().await?;
                 ElementAction::try_safe_click(&relocation_popup,3).await?;
             }
 
+            let accept_cookies = ElementAction::new(&driver,"[data-qa=\"cookies-policy-informer-accept\"]", &css_strategy);
+
+            if ElementAction::try_exists(&accept_cookies, 4).await?{
+                ElementAction::try_safe_click(&accept_cookies, 3).await?;
+            }
+            
             tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
             let submit_button = ElementAction::new(&driver, "[data-qa=\"vacancy-response-submit-popup\"]", &css_strategy);
-
             if ElementAction::try_exists(&submit_button, 3).await?{
-                //submit_button.safe_click().await?;
+                
                 ElementAction::try_safe_click(&submit_button,3).await?;
 
                 let response_letter_toggle = ElementAction::new(&driver, "[data-qa=\"vacancy-response-letter-toggle\"", &css_strategy);
                 
                 if ElementAction::try_exists(&response_letter_toggle, 3).await?{
-                    //response_letter_toggle.safe_click().await?;
+
                     ElementAction::try_safe_click(&response_letter_toggle,3).await?;
+
                     let response_popup_letter_form = ElementAction::new(&driver, "[data-qa=\"vacancy-response-popup-form-letter-input\"]", &css_strategy);
                     if response_popup_letter_form.exists().await?{
-                        //response_popup_letter_form.safe_click().await?;
                         ElementAction::try_safe_click(&response_popup_letter_form,3).await?;
 
                         response_popup_letter_form.send_keys("test".to_string()).await?;
@@ -131,31 +130,46 @@ async fn main() -> Result<(), ThirtyFourError> {
 
                         let submit_button = ElementAction::new(&driver, "[data-qa=\"vacancy-response-submit-popup\"", &css_strategy);
                         if submit_button.exists().await?{
-                            //submit_button.safe_click().await?;
                             ElementAction::try_safe_click(&submit_button,3).await?;
                         }
 
                     }
                 }
                 
-                match button_href{
-                    Some(href) => {
-                        responded_buttons_set.insert(href.to_string());
-                        println!("Added vacancy to responded set. Title:{}, href: {},", vacancy.get_title().await, href);
-                    },
-                    None => {}
-                }
+                // let last_vacancy = vacancies_vec.iter().last();
+
+                // if last_vacancy.is_some(){
+                //     if vacancy == last_vacancy.unwrap(){
+                //         println!("vacancy == last_vacancy.unwrap(): Title:{}, href: {}", vacancy.get_title().await, &href);
+
+                //         let page_next = ElementAction::new(&driver, "[data-qa=\"pager-next\"]",&css_strategy);
+                //         if ElementAction::try_exists(&page_next, 3).await?{
+                //             ElementAction::try_safe_click(&page_next,3).await?;
+                            
+                //             let url  = driver.current_url().await?;
+                //             target_url = url.clone().to_string();
+                //             driver.goto(&target_url).await?;
+                //             tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                //             println!("Changed target url on next page, target_url {}, curr_url: {}", &target_url, url);
+                            
+                //         }
+
+                //     }
+                // }
+
+                responded_buttons_set.insert(href.clone());
+                println!("Handled Vacancy: Title:{}, href: {}", vacancy.get_title().await, &href);
             }
 
             let current_url = driver.current_url().await?;
 
-            if current_url.as_str() != target_url {
+            if current_url.to_string() != target_url.clone() {
                 if ElementAction::try_exists(&limit_check, 3).await?{
                     reached_limit = true;
                     break;
                 }
 
-                driver.goto(target_url).await?;
+                driver.goto(&target_url).await?;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 break;
             }
@@ -164,34 +178,48 @@ async fn main() -> Result<(), ThirtyFourError> {
         all_vacancies.clear();
         all_vacancies = driver.find_all(By::Css(vacancy_selector)).await?;
 
+        let vacancies_on_page = 50 + 1;
+        let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
+        
         if !all_vacancies.is_empty(){
             all_vacancies.iter().next_back().unwrap().wait_until().clickable().await?;
             vacancies_vec.clear();
             
-            for vacancy_element in &all_vacancies{
+            let vacancies_on_page = 50 + 1;
+            let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
+
+            for vacancy_element in all_vacancies.iter().skip(elements_to_skip){
                 let mut vacancy = Vacancy::new(vacancy_element.clone());
                 vacancy.update_vacancy_fields().await;
                 
                 let respond_button = vacancy.get_button().await;
                 let title =vacancy.get_title().await;
+                let href = vacancy.get_href().await;
 
-                if respond_button.is_none() || title.is_empty(){
-                    continue;
-                }
-
-                let respond_button = respond_button.unwrap();
-
-                let button_href = respond_button.attr("href").await?;
-
-                if button_href.clone().is_some_and(|href| responded_buttons_set.contains(&href)){
-                    dbg!("already responded on this vacancy {}", button_href.as_ref().unwrap());
+                if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
+                    println!("Skipping vacancy with no button/title/href or already responded on it");
                     continue;
                 }
                 
                 vacancies_vec.push(vacancy);
+            }
+        }
+
+        if vacancies_vec.is_empty(){
+            println!("Vacancies are empty");
+
+            let page_next = ElementAction::new(&driver, "[data-qa=\"pager-next\"]",&css_strategy);
+            if ElementAction::try_exists(&page_next, 3).await?{
+                ElementAction::try_safe_click(&page_next,3).await?;
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+                let url  = driver.current_url().await?;
+                target_url = url.clone().to_string();
+                driver.goto(&target_url).await?;
+                
+                println!("next page: target_url {}, curr_url: {}", &target_url, url);
                 
             }
-
         }
 
         if reached_limit{

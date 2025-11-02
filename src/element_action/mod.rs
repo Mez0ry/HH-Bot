@@ -64,7 +64,7 @@ impl<'a> ElementAction<'a> {
                 Ok(stream) => return Ok(stream),
                 Err(e) => {
                     last_error = Some(e);
-                    dbg!("'exists' call attempt {}", attempt);
+                    println!("'exists' call attempt {}", attempt);
                     if attempt < retries {
                         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     }
@@ -80,7 +80,7 @@ impl<'a> ElementAction<'a> {
             match action.safe_click().await {
                 Ok(_) => (),
                 Err(_) => {
-                    dbg!("safe_click attempt {}", attempt);
+                    println!("safe_click attempt {}", attempt);
                     if attempt < retries {
                         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     }
