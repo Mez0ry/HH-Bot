@@ -5,8 +5,9 @@ pub mod cookie_manager;
 pub mod vacancy;
 pub mod element_action;
 pub mod selector;
+pub mod selector_manager;
 
-use crate::{cookie_manager::cookie_manager::CookieManager, element_action::ElementAction, selector::MySelector, vacancy::vacancy::Vacancy};
+use crate::{cookie_manager::cookie_manager::CookieManager, element_action::ElementAction, selector::MySelector, selector_manager::SelectorManager, vacancy::vacancy::Vacancy};
 
 type ThirtyFourError = thirtyfour::error::WebDriverError; // Исправили тип ошибки
 
@@ -53,13 +54,18 @@ async fn main() -> Result<(), ThirtyFourError> {
 
     driver.refresh().await?;
 
+    let _ = SelectorManager::load_selectors("./resources/selectors.json").await;
+
     // selectors
-    let content = std::fs::read_to_string("./resources/selectors.json".to_string())?;
-    let selectors: Vec<MySelector> = serde_json::from_str(&content)?;
+    //let content = std::fs::read_to_string("./resources/selectors.json".to_string())?;
+    //let selectors: Vec<MySelector> = serde_json::from_str(&content)?;
     
-    for sel in selectors {
-        println!("selector: {}, type: {}", sel.get_selector().await, sel.clone().get_type().await.to_string());
+    let find_selector = SelectorManager::find_selector("response_popup_letter_form").await;
+    if find_selector.is_some(){
+        let find_selector = find_selector.unwrap();
+        println!("selector: {}, type: {}", find_selector.clone().get_selector().await, find_selector.get_type().await.to_string());
     }
+
 
     // !selectors
     let mut responded_buttons_set: HashSet<String> = std::collections::HashSet::new();
@@ -202,7 +208,7 @@ async fn main() -> Result<(), ThirtyFourError> {
                 let respond_button = vacancy.get_button().await;
                 let title =vacancy.get_title().await;
                 let href = vacancy.get_href().await;
-                
+
                 if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
                     println!("Skipping vacancy with no button/title/href or already responded on it");
                     continue;
