@@ -1,40 +1,36 @@
 use thirtyfour::{error::WebDriverErrorInfo, prelude::*};
-
 use crate::selector::MySelector;
 
 pub struct ElementAction<'a> {
     driver: &'a WebDriver,
-    selector: &'a str,
-    by_strategy: &'a dyn Fn(&'a str) -> By,
-
-    my_selector : MySelector
+    selector : MySelector
 }
 
 impl<'a> ElementAction<'a> {
-    pub fn new(driver: &'a WebDriver, selector: &'a str, by_strategy: &'a dyn Fn(&'a str) -> By, my_selector: MySelector ) -> Self {
-        ElementAction { driver, selector, by_strategy , my_selector : my_selector}
+    pub fn new(driver: &'a WebDriver, my_selector: MySelector ) -> Self {
+        ElementAction { driver, selector : my_selector}
     }
 
     pub async fn exists(&self) -> Result<bool, WebDriverError> {
-        match self.driver.find((self.by_strategy)(self.selector)).await {
+        match self.find_element().await {
             Ok(_) => Ok(true),
             Err(_) => Ok(false),
         }
     }
 
     pub async fn is_displayed(&self) -> Result<bool, WebDriverError> {
-        let element = self.driver.find((self.by_strategy)(self.selector)).await?;
+        let element = self.find_element().await?;
         element.is_displayed().await
     }
 
     pub async fn is_clickable(&self) -> Result<bool, WebDriverError> {
-        let element = self.driver.find((self.by_strategy)(self.selector)).await?;
+        let element = self.find_element().await?;
         element.is_clickable().await
     }
 
     
     pub async fn click(&self) -> Result<(), WebDriverError> {
-        let element = self.driver.find((self.by_strategy)(self.selector)).await?;
+        let element = self.find_element().await?;
         element.click().await
     }
 
@@ -48,7 +44,7 @@ impl<'a> ElementAction<'a> {
     }
 
     pub async  fn send_keys(&self, keys : String) -> Result<(), WebDriverError>{
-        let element = self.driver.find((self.by_strategy)(self.selector)).await?;
+        let element = self.find_element().await?;
 
         match element.send_keys(keys).await{
             Ok(())=>{
@@ -94,4 +90,9 @@ impl<'a> ElementAction<'a> {
 
         Ok(())
     }
+
+    async fn find_element(&self) -> WebDriverResult<WebElement>{
+        self.driver.find(self.selector.clone().get_by()).await
+    }
+
 }

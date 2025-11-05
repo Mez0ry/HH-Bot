@@ -1,12 +1,13 @@
 [
+    {"logged_in": "[class=\"magritte-component-with-badge___p49ZX_3-2-5\"]", "type": "css"},
     {"vacancy": "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]", "type": "css"},
     {"vacancy_title": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
     {"vacancy_respond": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
-    {"relocation_popup": "[data-qa=\"relocation-warning-confirm\"]", "type": "css"},
-    {"accept_cookies": "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]", "type": "css"},
+    {"relocation_warning_confirm": "[data-qa=\"relocation-warning-confirm\"]", "type": "css"},
+    {"accept_cookies": "[data-qa=\"cookies-policy-informer-accept\"]", "type": "css"},
     {"submit_button": "[data-qa=\"vacancy-response-submit-popup\"]", "type": "css"},
     {"response_letter_toggle": "[data-qa=\"vacancy-response-letter-toggle\"]", "type": "css"},
-    {"response_popup_letter_form": "[data-qa=\"vacancy-response-popup-form-letter-input\"]", "type": "css"},
-
-    {"vacancy_limit_reached": "[class=\"bloko-translate-guard\"]", "type": "css"}
+    {"response_letter_form_input": "[data-qa=\"vacancy-response-popup-form-letter-input\"]", "type": "css"},
+    {"vacancy_limit_reached": "[class=\"bloko-translate-guard\"]", "type": "css"},
+    {"next_page": "[data-qa=\"pager-next\"]", "type": "css"}
 ]

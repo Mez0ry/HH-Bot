@@ -5,6 +5,7 @@ pub mod cookie_manager {
     use thirtyfour::error::WebDriverErrorInfo;
     use thirtyfour::prelude::*;
     use crate::element_action::{self, ElementAction};
+    use crate::selector_manager::SelectorManager;
 
     pub struct CookieManager {
         
@@ -42,10 +43,8 @@ pub mod cookie_manager {
         }
 
         async fn login(driver: &WebDriver) -> Result<(), WebDriverError> {
-            let css_strategy = |selector: &str| By::Css(selector.to_owned());
-
             driver.goto("http://hh.ru/login").await?;
-            let submit_button = element_action::ElementAction::new(driver, "[data-qa=\"submit-button\"]", &css_strategy);
+            let submit_button = element_action::ElementAction::new(driver, SelectorManager::find_selector("submit_button").await);
             
             if ElementAction::try_exists(&submit_button, 3).await?{
                 ElementAction::try_safe_click(&submit_button, 3).await?;
@@ -55,9 +54,7 @@ pub mod cookie_manager {
         }
 
         pub async fn parse_cookies(path: &String, driver : &WebDriver) -> Result<Option<Vec<Cookie>>, WebDriverError> {
-            let css_strategy = |selector: &str| By::Css(selector.to_owned());
-
-            let logged_in = element_action::ElementAction::new(driver, "[class=\"magritte-component-with-badge___p49ZX_3-2-5\"]", &css_strategy);
+            let logged_in = element_action::ElementAction::new(driver, SelectorManager::find_selector("logged_in").await);
             
             let str_as_path = std::path::Path::new(&path);
 
@@ -97,6 +94,7 @@ pub mod cookie_manager {
                         }else{
                             println!("Loggin required, attempt: {}", attempt)
                         }
+
                         if !login_once{
                             CookieManager::login(driver).await?;
                             login_once = true;
