@@ -1,5 +1,7 @@
 use std::{sync::{Arc, OnceLock}};
-use crate::selector::{MySelector};
+use thirtyfour::By;
+
+use crate::{element_action::{self, ElementAction}, selector::MySelector};
 
 // Type for storing the global vector
 type SelectorsVecType = Vec<MySelector>;
@@ -32,7 +34,7 @@ impl SelectorManager {
         }
 
         println!("Setting global state...");
-        GLOBAL_SELECTORS.set(Arc::new(selectors)); // Убираем сложную конструкцию с match
+        let _ = GLOBAL_SELECTORS.set(Arc::new(selectors)); // Убираем сложную конструкцию с match
 
         println!("Global state set successfully!");
 
@@ -40,8 +42,8 @@ impl SelectorManager {
             Some(arc_selectors) => {
                 println!("Iterating over selectors...");
                 for elem in arc_selectors.iter() {
-                    let selector = elem.get_selector().await;
-                    println!("Selector: {}, selector_type: {}", selector, elem.clone().get_type().await);
+                    let selector = elem.get_selector();
+                    println!("Selector: {}", selector);
                 }
             },
             None => eprintln!("Failed to retrieve global selectors after setting."),
@@ -50,19 +52,26 @@ impl SelectorManager {
         Ok(())
     }
 
-   pub async fn find_selector(selector: &str) -> Option<MySelector> {
-    println!("pre find_selector");
-    match GLOBAL_SELECTORS.get() {
-        Some(selectors) => {
-            for s in selectors.iter() {
-                if s.get_selector().await == selector {
-                    println!("found, selector: {}", s.get_selector().await);
-                    return Some(s.clone());
+   pub async fn find_selector(selector_name: &str) -> Option<MySelector> {
+        println!("pre find_selector");
+        match GLOBAL_SELECTORS.get() {
+            Some(selectors) => {
+                for s in selectors.iter() {
+                    if s.get_name() == selector_name {
+                        println!("found, selector: {}", s.get_selector());
+                        return Some(s.clone());
+                    }
                 }
-            }
-            None
-        },
-        None => None,
+                None
+            },
+            None => None,
+        }
     }
-}
+
+    pub async fn find_selector_as_action<'a>(driver : &'a thirtyfour::WebDriver, selector_name: &'a str) -> Option<ElementAction<'a>>{
+        let selector = Self::find_selector(selector_name).await?;
+        
+        Some(element_action::ElementAction::new(driver, selector.get_selector(), &selector.get_type_as_callback()))
+    }
+
 }

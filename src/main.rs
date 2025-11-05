@@ -38,7 +38,7 @@ async fn main() -> Result<(), ThirtyFourError> {
     caps.add_arg("--log-level=3")?;
     caps.add_arg("--enable-unsafe-swiftshader")?;
 
-    let driver = WebDriver::new("http://localhost:57434", caps).await?;
+    let driver = WebDriver::new("http://localhost:62855", caps).await?;
 
     let mut target_url : String = "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line".to_string();
 
@@ -63,7 +63,7 @@ async fn main() -> Result<(), ThirtyFourError> {
     let find_selector = SelectorManager::find_selector("response_popup_letter_form").await;
     if find_selector.is_some(){
         let find_selector = find_selector.unwrap();
-        println!("selector: {}, type: {}", find_selector.clone().get_selector().await, find_selector.get_type().await.to_string());
+        println!("selector: {}, type!!!: {}", find_selector.clone().get_selector().await, find_selector.get_type().await.to_string());
     }
 
 

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize, Serializer, de::{self,}, ser::SerializeStruc
 
 #[derive(Debug, Clone) ]
 pub struct MySelector {
+    name : String,
     selector: String,
     selector_type: By,
 }
@@ -48,13 +49,23 @@ impl<'de> Deserialize<'de> for MySelector {
         let (key1, val1) = first_pair;
         let (key2, val2) = second_pair;
 
-        // Назначаем роли (можно менять местами в зависимости от нужд)
+        println!("fkey 1: {}, fval1: {}, skey2: {}, sval2: {}", key1, val1, key2, val2);
+
+        let mut name : String = String::new();
+
         let (selector_type, selector) = if key1.contains("type") || key1.contains("selector_type") {
             (val1, val2)
         } else {
             (val2, val1)
         };
 
+        if key1.contains("type") || key2.contains("selector_type"){
+            name = key2;
+        }else{
+            name = key1;
+        }
+
+        println!("name: {}",name);
         let selector_type = match selector_type.as_str() {
             "css" => By::Css(selector.clone()),
             "xpath" => By::XPath(selector.clone()),
@@ -69,6 +80,7 @@ impl<'de> Deserialize<'de> for MySelector {
         };
 
         Ok(MySelector {
+            name,
             selector,
             selector_type,
         })
@@ -76,20 +88,25 @@ impl<'de> Deserialize<'de> for MySelector {
 }
 
 impl MySelector{
-    pub fn new(selector: String, by_strategy: thirtyfour::By) -> Self {
-        MySelector { selector : selector, selector_type : by_strategy}
+    pub fn new(name : String,selector: String, by_strategy: thirtyfour::By) -> Self {
+        MySelector {name : name , selector : selector, selector_type : by_strategy}
     }
 
-    pub async fn get_selector(&self) -> &str{
-        self.selector.as_str()
+    pub fn get_selector(&self) -> &str{
+        self.selector.as_str().clone()
+    }
+
+    pub fn get_name(&self) -> &str{
+        self.name.as_str()
     }
 
     pub fn get_selector_non_async(&self) -> &str{
         self.selector.as_str()
     }
 
-    pub async fn get_type(self) -> thirtyfour::By{
-        self.selector_type
+    pub fn get_type_as_callback(self) -> impl Fn(&str) -> By{
+       let res = |selector: &str| By::Css(selector.to_owned());
+       return res;
     }
 
 }

@@ -1,14 +1,18 @@
 use thirtyfour::{error::WebDriverErrorInfo, prelude::*};
 
+use crate::selector::MySelector;
+
 pub struct ElementAction<'a> {
     driver: &'a WebDriver,
     selector: &'a str,
     by_strategy: &'a dyn Fn(&'a str) -> By,
+
+    my_selector : MySelector
 }
 
 impl<'a> ElementAction<'a> {
-    pub fn new(driver: &'a WebDriver, selector: &'a str, by_strategy: &'a dyn Fn(&'a str) -> By) -> Self {
-        ElementAction { driver, selector, by_strategy }
+    pub fn new(driver: &'a WebDriver, selector: &'a str, by_strategy: &'a dyn Fn(&'a str) -> By, my_selector: MySelector ) -> Self {
+        ElementAction { driver, selector, by_strategy , my_selector : my_selector}
     }
 
     pub async fn exists(&self) -> Result<bool, WebDriverError> {
