@@ -1,12 +1,21 @@
 pub mod vacancy {
+    use serde::de::value::Error;
     use thirtyfour::prelude::*;
+
+    use crate::selector_manager::SelectorManager;
     
-    #[derive(Debug, Clone)]
+    #[derive(Clone)]
     pub struct Vacancy{
         title : Option<String>,
         respond_button : Option<WebElement>,
         button_href : String,
         vacancy_element : WebElement
+    }
+
+    impl std::fmt::Display for Vacancy {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_struct("Vacancy").field("title", &self.title).field("respond_button", &self.respond_button).field("button_href", &self.button_href).field("vacancy_element", &self.vacancy_element).finish()
+        }
     }
     
     impl PartialEq for Vacancy {
@@ -21,8 +30,7 @@ pub mod vacancy {
         }
         
         pub async fn update_vacancy_fields(&mut self){
-            let respond_button_selector = "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]";
-            let button_res = self.vacancy_element.find(By::Css(respond_button_selector)).await;
+            let button_res = self.vacancy_element.find(SelectorManager::find_selector("vacancy_respond").await.get_by()).await;
             
             match button_res{
                 Ok(button_element)=>{ 
@@ -54,42 +62,38 @@ pub mod vacancy {
             }
         }
 
-        pub async fn click_respond(&self){
-            
-            let is_clickable = async |_element : &Vacancy| -> bool {
-                match &self.respond_button {
-                    Some(elem) => {
-                        let success = elem.is_clickable().await;
-                        Some(success);
-                    },
-                    None => {},
-                }
-                false
-            };
-
+        pub async fn click_respond(&self) -> core::result::Result<bool, WebDriverError>{
             if self.respond_button.is_some(){
                 let button = self.respond_button.as_ref().unwrap();
-
-                if is_clickable(&self).await{
-                    //??? XDDD
-                }
+                let _ = button.wait_until().clickable().await;
+                let _ = button.wait_until().enabled().await;
+                let _ = button.wait_until().displayed().await;
 
                 let click_result = button.click().await;
 
                 match click_result {
-                    Ok(_) => println!("Respond button clicked"),
-                    Err(e) => eprintln!("Failed to click button: {:?}", e),
+                    Ok(_) => {
+                        println!("Respond button clicked");
+                        return Ok(true);
+                    },
+                    Err(e) => {
+                        eprintln!("Failed to click button: {:?}", e);
+                        return Ok(false);
+                    },
                 };
-
+            }else{
+                Ok(false)
             }
         }
 
-        pub async fn get_title(&self) -> &String{
+        pub async fn get_title(&self) -> String{
             match &self.title {
                 Some(title_text)=>{
-                    return title_text
+                    return title_text.clone()
                 },
-                None => panic!("title is None")
+                None => {
+                    return "".to_string();
+                }
             }
         }
 

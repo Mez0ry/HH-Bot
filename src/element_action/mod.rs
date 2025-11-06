@@ -8,7 +8,7 @@ pub struct ElementAction<'a> {
 
 impl<'a> ElementAction<'a> {
     pub fn new(driver: &'a WebDriver, my_selector: MySelector ) -> Self {
-        ElementAction { driver, selector : my_selector}
+        ElementAction { driver : driver, selector : my_selector}
     }
 
     pub async fn exists(&self) -> Result<bool, WebDriverError> {
@@ -27,7 +27,6 @@ impl<'a> ElementAction<'a> {
         let element = self.find_element().await?;
         element.is_clickable().await
     }
-
     
     pub async fn click(&self) -> Result<(), WebDriverError> {
         let element = self.find_element().await?;
@@ -64,7 +63,7 @@ impl<'a> ElementAction<'a> {
                 Ok(stream) => return Ok(stream),
                 Err(e) => {
                     last_error = Some(e);
-                    println!("'exists' call attempt {}", attempt);
+                    println!("'exists' call failed, attempt {}", attempt);
                     if attempt < retries {
                         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                     }

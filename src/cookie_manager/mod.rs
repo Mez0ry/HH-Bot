@@ -54,19 +54,21 @@ pub mod cookie_manager {
         }
 
         pub async fn parse_cookies(path: &String, driver : &WebDriver) -> Result<Option<Vec<Cookie>>, WebDriverError> {
-            let logged_in = element_action::ElementAction::new(driver, SelectorManager::find_selector("logged_in").await);
-            
             let str_as_path = std::path::Path::new(&path);
 
             if !str_as_path.exists() || str_as_path.is_dir() {
                 File::create(path)?;
             }
 
-            const MAX_ATTEMPTS: usize = 200;
+            const MAX_ATTEMPTS: usize = 5222;
             const DELAY_BETWEEN_ATTEMPTS_MILLIS: u64 = 2000;
             let mut login_once: bool = false;
             
             for attempt in 0..MAX_ATTEMPTS {
+                let logged_in = element_action::ElementAction::new(driver, SelectorManager::find_selector("logged_in").await);
+                let chat_activator_button = element_action::ElementAction::new(driver, SelectorManager::find_selector("chat_activator_button").await);
+                //let login_button = element_action::ElementAction::new(driver, SelectorManager::find_selector("login_button").await);
+                
                 let content = std::fs::read_to_string(&str_as_path)?;
                 let parsed_cookies: Result<Vec<Cookie>, serde_json::Error> = serde_json::from_str(&content);
                 
@@ -86,17 +88,23 @@ pub mod cookie_manager {
                             )));
                         }
 
-                        if ElementAction::try_exists(&logged_in, 3).await?{
+                        if ElementAction::try_exists(&logged_in, 3).await? || ElementAction::try_exists(&chat_activator_button, 3).await?{
+                            println!("exists");
                             let cookies = driver.get_all_cookies().await?;
 
                             CookieManager::save_cookies(path.to_string(), driver.get_all_cookies().await?).await?;
                             return Ok(Some(cookies));
-                        }else{
-                            println!("Loggin required, attempt: {}", attempt)
-                        }
+                        }else if !login_once{
+                            println!("Loggin required, attempt: {}", attempt);
 
-                        if !login_once{
                             CookieManager::login(driver).await?;
+                            let current_url = driver.current_url().await?;
+                            if !current_url.to_string().contains("login"){
+                                let cookies = driver.get_all_cookies().await?;
+
+                                CookieManager::save_cookies(path.to_string(), driver.get_all_cookies().await?).await?;
+                                return Ok(Some(cookies));
+                            }
                             login_once = true;
                         }
                         

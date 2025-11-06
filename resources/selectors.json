@@ -1,8 +1,12 @@
 [
     {"logged_in": "[class=\"magritte-component-with-badge___p49ZX_3-2-5\"]", "type": "css"},
+    {"chat_activator_button": "[data-qa=\"chatikActivator-button-text\"]", "type": "css"},
+    {"login_button": "[data-qa=\"mainmenu_profile-link\"]", "type": "css"},
+    
+
     {"vacancy": "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]", "type": "css"},
     {"vacancy_title": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
-    {"vacancy_respond": "[data-qa=\"serp-item__title-text\"]", "type": "css"},
+    {"vacancy_respond": "[data-qa=\"vacancy-serp__vacancy_response\"][class*=\"magritte-button_stretched\"]", "type": "css"},
     {"relocation_warning_confirm": "[data-qa=\"relocation-warning-confirm\"]", "type": "css"},
     {"accept_cookies": "[data-qa=\"cookies-policy-informer-accept\"]", "type": "css"},
     {"submit_button": "[data-qa=\"vacancy-response-submit-popup\"]", "type": "css"},

@@ -37,8 +37,8 @@ async fn main() -> Result<(), ThirtyFourError> {
     caps.add_arg("--disable-ipc-flooding-protection")?;
     caps.add_arg("--log-level=3")?;
     caps.add_arg("--enable-unsafe-swiftshader")?;
-
-    let driver = WebDriver::new("http://localhost:62855", caps).await?;
+    
+    let driver = WebDriver::new("http://localhost:63768", caps).await?;
 
     let mut target_url : String = "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line".to_string();
 
@@ -58,10 +58,7 @@ async fn main() -> Result<(), ThirtyFourError> {
 
     let mut responded_buttons_set: HashSet<String> = std::collections::HashSet::new();
 
-    // let vacancy_selector = "[class=\"vacancy-card--n77Dj8TY8VIUF0yM font-inter\"]";
     let mut all_vacancies = driver.find_all(SelectorManager::find_selector("vacancy").await.get_by()).await?;
-    
-    all_vacancies.iter().next_back().unwrap().wait_until().clickable().await?;
 
     let mut vacancies_vec : Vec<Vacancy> = vec![];
     
@@ -81,13 +78,18 @@ async fn main() -> Result<(), ThirtyFourError> {
             let href = vacancy.get_href().await;
 
             if respond_button.is_none() || href.is_none() || href.clone().is_some_and(|actual_href|  responded_buttons_set.contains(&actual_href)) {
+                responded_buttons_set.insert(href.unwrap().clone());
                 continue;
             }
 
             let href = href.unwrap();
 
             tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-            vacancy.click_respond().await;
+
+            if !vacancy.click_respond().await?{
+                responded_buttons_set.insert(href.clone());
+                continue;
+            }
 
             let limit_check = ElementAction::new(&driver, SelectorManager::find_selector("vacancy_limit_reached").await);
             if ElementAction::try_exists(&limit_check, 3).await?{
@@ -138,9 +140,10 @@ async fn main() -> Result<(), ThirtyFourError> {
                     }
                 }
 
-                responded_buttons_set.insert(href.clone());
-                println!("Handled Vacancy: Title: {}, href: {}", vacancy.get_title().await, &href);
             }
+            
+            responded_buttons_set.insert(href.clone());
+            println!("Handled Vacancy: Title: {}, href: {}", vacancy.get_title().await, &href);
 
             let current_url = driver.current_url().await?;
 
@@ -159,25 +162,6 @@ async fn main() -> Result<(), ThirtyFourError> {
         all_vacancies.clear();
         all_vacancies = driver.find_all(SelectorManager::find_selector("vacancy").await.get_by()).await?;
 
-        let vacancies_on_page = 50 + 1;
-        let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
-
-        if elements_to_skip == vacancies_on_page - 1{
-            println!("Vacancies are empty");
-
-            let page_next = ElementAction::new(&driver, SelectorManager::find_selector("next_page").await);
-            if ElementAction::try_exists(&page_next, 3).await?{
-                ElementAction::try_safe_click(&page_next,3).await?;
-                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-
-                let url  = driver.current_url().await?;
-                target_url = url.clone().to_string();
-                driver.goto(&target_url).await?;
-                
-                println!("next page: target_url {}, curr_url: {}", &target_url, url);
-            }
-        }
-
         all_vacancies.iter().next_back().unwrap().wait_until().clickable().await?;
 
         if !all_vacancies.is_empty(){
@@ -195,11 +179,53 @@ async fn main() -> Result<(), ThirtyFourError> {
                 let href = vacancy.get_href().await;
 
                 if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
-                    println!("Skipping vacancy with no button/title/href or already responded on it");
+                    eprintln!("Skipping vacancy with no button/title/href or already responded on it");
                     continue;
                 }
                 
                 vacancies_vec.push(vacancy);
+            }
+        }
+
+        if vacancies_vec.is_empty(){
+            let page_next = ElementAction::new(&driver, SelectorManager::find_selector("next_page").await);
+            if ElementAction::try_exists(&page_next, 3).await?{
+                ElementAction::try_safe_click(&page_next,3).await?;
+                tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
+
+                let url  = driver.current_url().await?;
+                target_url = url.clone().to_string();
+                driver.goto(&target_url).await?;
+                tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
+
+                all_vacancies = driver.find_all(SelectorManager::find_selector("vacancy").await.get_by()).await?;
+
+                if !all_vacancies.is_empty(){
+                    vacancies_vec.clear();
+                    
+                    let vacancies_on_page = 49;
+                    let elements_to_skip = responded_buttons_set.len() % vacancies_on_page;
+                    
+                    for vacancy_element in all_vacancies.iter().skip(elements_to_skip){
+                        vacancy_element.wait_until().clickable().await?;
+
+                        let mut vacancy = Vacancy::new(vacancy_element.clone());
+                        vacancy.update_vacancy_fields().await;
+                        
+                        let respond_button = vacancy.get_button().await;
+                        let title = vacancy.get_title().await;
+                        let href = vacancy.get_href().await;
+
+                        if respond_button.is_none() || title.is_empty() || href.is_none() || href.is_some_and(|actual_href| responded_buttons_set.contains(&actual_href)){
+                            eprintln!("Skipping vacancy with no button/title/href or already responded on it");
+                            continue;
+                        }
+                        
+                        vacancies_vec.push(vacancy);
+                    }
+                }
+                responded_buttons_set.clear();
+                println!("moving to page: target_url {}", &target_url);
             }
         }
 

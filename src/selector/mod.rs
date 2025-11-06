@@ -53,8 +53,6 @@ impl<'de> Deserialize<'de> for MySelector {
         let (key1, val1) = first_pair;
         let (key2, val2) = second_pair;
 
-        println!("fkey 1: {}, fval1: {}, skey2: {}, sval2: {}", key1, val1, key2, val2);
-
         let name : String;
 
         let (selector_strategy, selector) = if key1.contains("type") || key1.contains("selector_strategy") {
@@ -68,8 +66,7 @@ impl<'de> Deserialize<'de> for MySelector {
         }else{
             name = key1;
         }
-
-        println!("name: {}",name);
+        
         let selector_strategy = match selector_strategy.as_str() {
             "css" => By::Css(selector.clone()),
             "xpath" => By::XPath(selector.clone()),

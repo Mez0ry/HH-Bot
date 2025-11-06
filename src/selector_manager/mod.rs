@@ -24,22 +24,9 @@ impl SelectorManager {
 
         if selectors.is_empty() {
             eprintln!("selectors empty");
-        } else {
-            eprintln!("non-empty selectors count: {}", selectors.len());
         }
 
         let _ = GLOBAL_SELECTORS.set(Arc::new(selectors));
-
-        match GLOBAL_SELECTORS.get() {
-            Some(arc_selectors) => {
-                println!("Iterating over selectors...");
-                for elem in arc_selectors.iter() {
-                    let selector = elem.get_selector();
-                    println!("Selector: {}", selector);
-                }
-            },
-            None => eprintln!("Failed to retrieve global selectors after setting."),
-        };
 
         Ok(())
     }
@@ -49,7 +36,6 @@ impl SelectorManager {
             Some(selectors) => {
                 for s in selectors.iter() {
                     if s.get_name() == selector_name {
-                        println!("found selector, name: {}", s.get_name());
                         return s.clone();
                     }
                 }
