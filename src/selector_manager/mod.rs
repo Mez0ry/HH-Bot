@@ -1,7 +1,8 @@
 use std::{sync::{Arc, OnceLock}};
-
 use thirtyfour::By;
-
+/**
+ * @TODO implement mechanism of waiting until selectors are loaded in multithreading enviroment
+ */
 use crate::{element_action::{self, ElementAction}, selector::MySelector};
 
 type SelectorsVecType = Vec<MySelector>;
@@ -11,6 +12,9 @@ static GLOBAL_SELECTORS: OnceLock<Arc<SelectorsVecType>> = OnceLock::new();
 pub struct SelectorManager {}
 
 impl SelectorManager {
+    /**
+     * @TODO rewrite
+     */
     pub async fn load_selectors(path: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let content = tokio::fs::read_to_string(path).await?;
 

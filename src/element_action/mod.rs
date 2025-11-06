@@ -55,12 +55,12 @@ impl<'a> ElementAction<'a> {
         }
     }
 
-    pub async fn try_exists(action: &ElementAction<'_>, retries: u32) -> Result<bool, WebDriverError> {
+    pub async fn try_exists(action: &ElementAction<'_>, retries: u32) -> bool {
         let mut last_error = None;
 
         for attempt in 1..= retries {
             match action.exists().await {
-                Ok(stream) => return Ok(stream),
+                Ok(stream) => return stream,
                 Err(e) => {
                     last_error = Some(e);
                     println!("'exists' call failed, attempt {}", attempt);
@@ -70,14 +70,15 @@ impl<'a> ElementAction<'a> {
                 }
             }
         }
-
-        Err(last_error.unwrap_or_else(|| WebDriverError::ElementNotInteractable(WebDriverErrorInfo::new("Element doesnt exists".to_string()))))
+        
+        println!("Element doesnt exists: {}", last_error.unwrap());
+        false
     }
 
-    pub async fn try_safe_click(action: &ElementAction<'_>, retries: u32) -> Result<(), WebDriverError>{
+    pub async fn try_safe_click(action: &ElementAction<'_>, retries: u32) -> bool{
         for attempt in 1..= retries {
             match action.safe_click().await {
-                Ok(_) => (),
+                Ok(_) => return true,
                 Err(_) => {
                     println!("safe_click attempt {}", attempt);
                     if attempt < retries {
@@ -87,7 +88,7 @@ impl<'a> ElementAction<'a> {
             }
         }
 
-        Ok(())
+        false
     }
 
     async fn find_element(&self) -> WebDriverResult<WebElement>{
