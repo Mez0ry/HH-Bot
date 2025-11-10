@@ -15,9 +15,6 @@ impl std::fmt::Display for Vacancy {
     }
 }
 
-/**
- * @TEST requires
- */
 impl PartialEq for Vacancy {
     fn eq(&self, other: &Self) -> bool {
         self.title == other.title && self.button_href == other.button_href

@@ -1,5 +1,5 @@
-use std::{collections::HashSet, result};
-use thirtyfour::{WebDriver, error::WebDriverError, prelude::ElementWaitable};
+use std::{collections::HashSet};
+use thirtyfour::{WebDriver, prelude::ElementWaitable};
 
 use crate::{element_action::ElementAction, selector_manager::SelectorManager, vacancy::Vacancy};
 /**
@@ -20,12 +20,12 @@ pub struct Page<'a> {
 }
 
 #[derive(PartialEq)]
-enum ProcessingInfo{
+pub enum ProcessingInfo{
     RedirectSuccess,
     Processed
 }
 
-enum ProcessingError{
+pub enum ProcessingError{
     ButtonNotFound,
     HrefAlreadyProcessed,
     LimitReached,
@@ -37,7 +37,10 @@ enum ProcessingError{
 }
 
 pub enum PageProcessState{
-    GatheringVacancies
+    GatheringVacancies,
+    ProcessingVacancy,
+    ReGatheringVacancies,
+    PageProcessed
 }
 
 pub enum GatheringInfo{
@@ -51,8 +54,13 @@ impl<'a> Page<'a> {
         Page {target_url : target_url, driver: driver, processed_vacancies: HashSet::new(), vacancies_on_page: 49, vacancies_to_skip: 0 }
     }
 
-    pub async fn process_vacancy(&mut self, vacancy: &Vacancy) -> Result<ProcessingInfo, ProcessingError> {
+    async fn process_vacancy(&mut self, vacancy: &Vacancy) -> Result<ProcessingInfo, ProcessingError> {
         println!("Processing vacancy: title: {}", vacancy.get_title().await);
+
+        let limit_check = ElementAction::new(&self.driver, SelectorManager::find_selector("vacancy_limit_reached").await);
+        if ElementAction::try_exists(&limit_check, 3).await{
+            return Err(ProcessingError::LimitReached);
+        }
 
         let respond_button = vacancy.get_button().await;
         let href = vacancy.get_href().await;
@@ -67,50 +75,39 @@ impl<'a> Page<'a> {
             return Err(ProcessingError::HrefAlreadyProcessed);
         }
 
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-
         if !vacancy.click_respond().await {
             self.processed_vacancies.insert(href.clone());
             return Err(ProcessingError::SubmitButtonClickFailure);
         }
 
-        let limit_check = ElementAction::new(&self.driver, SelectorManager::find_selector("vacancy_limit_reached").await);
-        if ElementAction::try_exists(&limit_check, 3).await {
-            return Err(ProcessingError::LimitReached);
-        }
-
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         let relocation_popup = ElementAction::new(&self.driver, SelectorManager::find_selector("relocation_warning_confirm").await);
-        if ElementAction::try_exists(&relocation_popup, 3).await {
-            ElementAction::try_safe_click(&relocation_popup, 3).await;
+        if ElementAction::try_exists(&relocation_popup, 2).await {
+            ElementAction::try_safe_click(&relocation_popup, 2).await;
         }
 
         let accept_cookies = ElementAction::new(&self.driver, SelectorManager::find_selector("accept_cookies").await);
-        if ElementAction::try_exists(&accept_cookies, 4).await {
-            ElementAction::try_safe_click(&accept_cookies, 3).await;
+        if ElementAction::try_exists(&accept_cookies, 2).await {
+            ElementAction::try_safe_click(&accept_cookies, 2).await;
         }
 
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-
         let submit_button = ElementAction::new(&self.driver, SelectorManager::find_selector("submit_button").await);
-        if ElementAction::try_exists(&submit_button, 3).await {
-            ElementAction::try_safe_click(&submit_button, 3).await;
+        if ElementAction::try_exists(&submit_button, 2).await {
+            ElementAction::try_safe_click(&submit_button, 2).await;
 
             let response_letter_toggle = ElementAction::new(&self.driver, SelectorManager::find_selector("response_letter_toggle").await);
-            if ElementAction::try_exists(&response_letter_toggle, 3).await {
-                ElementAction::try_safe_click(&response_letter_toggle, 3).await;
+            if ElementAction::try_exists(&response_letter_toggle, 2).await {
+                ElementAction::try_safe_click(&response_letter_toggle, 2).await;
 
                 let response_letter_form_input = ElementAction::new(&self.driver, SelectorManager::find_selector("response_letter_form_input").await);
-                if ElementAction::try_exists(&response_letter_form_input, 3).await{
-                    ElementAction::try_safe_click(&response_letter_form_input, 3).await;
+                if ElementAction::try_exists(&response_letter_form_input, 2).await{
+                    ElementAction::try_safe_click(&response_letter_form_input, 2).await;
                     response_letter_form_input.send_keys("test".to_string()).await;
 
-                    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-
                     let submit_button = ElementAction::new(&self.driver, SelectorManager::find_selector("submit_button").await);
-                    if ElementAction::try_exists(&submit_button, 3).await{
-                        ElementAction::try_safe_click(&submit_button, 3).await;
+                    if ElementAction::try_exists(&submit_button, 2).await{
+                        ElementAction::try_safe_click(&submit_button, 2).await;
                     }
                 }
             }
@@ -139,14 +136,14 @@ impl<'a> Page<'a> {
         Ok(ProcessingInfo::Processed)
     }
 
-    pub async fn gather_vacancies(&mut self, vacancies_out : &mut Vec<Vacancy>) -> GatheringInfo{
+    async fn gather_vacancies(&mut self, vacancies_out : &mut Vec<Vacancy>) -> GatheringInfo{
         if !vacancies_out.is_empty(){
             vacancies_out.clear();
         }
 
         let all_vacancies = self.driver.find_all(SelectorManager::find_selector("vacancy").await.get_by()).await;
         match all_vacancies {
-            Ok(vacancies)=>{
+            Ok(vacancies) => {
                 self.vacancies_to_skip = self.processed_vacancies.len() % self.vacancies_on_page;
 
                 for vacancy_element in vacancies.iter().skip(self.vacancies_to_skip){
@@ -178,12 +175,9 @@ impl<'a> Page<'a> {
                 return GatheringInfo::DriverError;
             }
         }
-
-        unreachable!("by some unknown reason failed to gather vacancies, and its reached 'unreachable' state");
     }
 
     pub async fn process_page(& mut self) -> PageProcessState{
-        let state = PageProcessState::GatheringVacancies;
         
         let mut vacancies : Vec<Vacancy> = vec![];
 
@@ -194,7 +188,7 @@ impl<'a> Page<'a> {
             GatheringInfo::EmptyAfterGathered => {
                 //retry
             },
-            GatheringInfo::DriverError => return state,
+            GatheringInfo::DriverError => return PageProcessState::GatheringVacancies,
         }
 
         let mut processing_page : bool = true;
@@ -213,7 +207,11 @@ impl<'a> Page<'a> {
                         match error{
                             ProcessingError::ButtonNotFound => {},
                             ProcessingError::HrefAlreadyProcessed => {},
-                            ProcessingError::LimitReached => processing_page = false,
+                            ProcessingError::LimitReached => {
+                                processing_page = false;
+                                println!("Limit reached");
+                                break;
+                            },
                             ProcessingError::RelocationPopupFailure => {},
                             ProcessingError::AcceptCookiesFailure => {},
                             ProcessingError::SubmitButtonClickFailure => {},
@@ -224,7 +222,7 @@ impl<'a> Page<'a> {
                 }
 
             }
-
+            
             match self.gather_vacancies(&mut vacancies).await {
                 GatheringInfo::Gathered => {
                     continue;
@@ -232,19 +230,19 @@ impl<'a> Page<'a> {
                 GatheringInfo::EmptyAfterGathered => {
                  self.move_to_next_page_if_any(&mut vacancies).await; // if failed goto to next search query
                 },
-                GatheringInfo::DriverError => return state,
+                GatheringInfo::DriverError => return PageProcessState::ReGatheringVacancies,
             }
         }
 
-        return state;
+        return PageProcessState::PageProcessed;
     }
 
-    pub async fn move_to_next_page_if_any(&mut self, vacancies_out: &mut Vec<Vacancy>){
+    async fn move_to_next_page_if_any(&mut self, vacancies_out: &mut Vec<Vacancy>){
       
         let page_next = ElementAction::new(&self.driver, SelectorManager::find_selector("next_page").await);
         if ElementAction::try_exists(&page_next, 3).await{
             ElementAction::try_safe_click(&page_next,3).await;
-            tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
+            tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
             let url  = self.driver.current_url().await;
             if url.is_ok(){
                 let url = url.unwrap();
@@ -253,7 +251,7 @@ impl<'a> Page<'a> {
                 self.target_url = url.clone().to_string();
                 let _ = self.driver.goto(&self.target_url).await;
 
-                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
                 self.gather_vacancies(vacancies_out).await;
                 self.processed_vacancies.clear();
 

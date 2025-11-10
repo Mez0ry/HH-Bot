@@ -1,5 +1,5 @@
 use thirtyfour::{error::WebDriverErrorInfo, prelude::*};
-use crate::selector::MySelector;
+use crate::{retry, selector::MySelector};
 
 pub struct ElementAction<'a> {
     driver: &'a WebDriver,
@@ -23,9 +23,21 @@ impl<'a> ElementAction<'a> {
         element.is_displayed().await
     }
 
-    pub async fn is_clickable(&self) -> Result<bool, WebDriverError> {
-        let element = self.find_element().await?;
-        element.is_clickable().await
+    pub async fn is_clickable(&self) -> bool {
+        let element = self.find_element().await;
+
+        match element {
+            Ok(element)=>{
+                match element.is_clickable().await{
+                    Ok(success)=> return success,
+                    Err(_) => return false
+                }
+            },
+            Err(err)=>{
+                println!("Failed to find element, err: {}", err);
+            }
+        }
+        false
     }
     
     pub async fn click(&self) -> Result<(), WebDriverError> {
@@ -34,7 +46,7 @@ impl<'a> ElementAction<'a> {
     }
 
     pub async fn safe_click(&self) -> Result<(), WebDriverError> {
-        if self.exists().await? && self.is_displayed().await? && self.is_clickable().await? {
+        if self.exists().await? && self.is_displayed().await? && self.is_clickable().await {
             self.click().await?;
             Ok(())
         } else {
@@ -42,53 +54,52 @@ impl<'a> ElementAction<'a> {
         }
     }
 
-    pub async  fn send_keys(&self, keys : String) -> Result<(), WebDriverError>{
-        let element = self.find_element().await?;
+    pub async fn send_keys(&self, keys : String) -> bool{
+        let result_element = self.find_element().await;
+
+        let element = result_element.unwrap();
 
         match element.send_keys(keys).await{
             Ok(())=>{
-                Ok(())
+                true
             },
-            Err(_)=>{
-                Err(WebDriverError::ElementNotInteractable(WebDriverErrorInfo::new("Cannot send keys to element".to_string())))
+            Err(err)=>{
+                println!("Failed to send keys, error: {}", err);
+                false
             }
         }
     }
 
     pub async fn try_exists(action: &ElementAction<'_>, retries: u32) -> bool {
-        let mut last_error = None;
-
-        for attempt in 1..= retries {
+        return retry::retry_on_err(async |attempt : u32| {
             match action.exists().await {
                 Ok(stream) => return stream,
-                Err(e) => {
-                    last_error = Some(e);
-                    println!("'exists' call failed, attempt {}", attempt);
+                Err(_) => {
+                    println!("element doesnt exists, attempt {}", attempt);
                     if attempt < retries {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                     }
+                    false
                 }
             }
-        }
-        
-        println!("Element doesnt exists: {}", last_error.unwrap());
-        false
+        }, retries).await;
     }
 
     pub async fn try_safe_click(action: &ElementAction<'_>, retries: u32) -> bool{
-        for attempt in 1..= retries {
+        return retry::retry_on_err(async |attempt : u32| {
             match action.safe_click().await {
                 Ok(_) => return true,
                 Err(_) => {
                     println!("safe_click attempt {}", attempt);
+                    
                     if attempt < retries {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                     }
+
+                    false
                 }
             }
-        }
-
-        false
+        }, retries).await;
     }
 
     async fn find_element(&self) -> WebDriverResult<WebElement>{
