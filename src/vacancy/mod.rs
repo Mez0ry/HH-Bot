@@ -1,7 +1,7 @@
 use thirtyfour::prelude::*;
 use crate::selector_manager::SelectorManager;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Vacancy{
     title : Option<String>,
     respond_button : Option<WebElement>,
@@ -10,15 +10,18 @@ pub struct Vacancy{
 }
 
 impl std::fmt::Display for Vacancy {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.debug_struct("Vacancy").field("title", &self.title).field("respond_button", &self.respond_button).field("button_href", &self.button_href).field("vacancy_element", &self.vacancy_element).finish()
     }
 }
 
-impl PartialEq for Vacancy {
+impl PartialEq for Vacancy  {
     fn eq(&self, other: &Self) -> bool {
         self.title == other.title && self.button_href == other.button_href
     }
+}
+unsafe impl Send for Vacancy {
+    
 }
 
 impl Vacancy {
@@ -27,13 +30,13 @@ impl Vacancy {
     }
     
     pub async fn update_vacancy_fields(&mut self){
-        let button_res = self.vacancy_element.find(SelectorManager::find_selector("vacancy_respond").await.get_by()).await;
+        let button_res = self.vacancy_element.find(SelectorManager::find_selector("vacancy_respond".to_string()).await.get_by()).await;
         
         match button_res{
             Ok(button_element)=>{ 
                 self.respond_button = Some(button_element);
             },
-            Err(err)=>{dbg!("button wasnt found, error: {}", err);}
+            Err(err)=>{println!("button wasnt found, error: {}", err);}
         }
 
         match self.get_href().await {
@@ -50,7 +53,7 @@ impl Vacancy {
                 let title_text= vacancy_title_element.text().await;
                 match title_text {
                     Ok(actual_title)=>{self.title = Some(actual_title);},
-                    Err(err)=>{dbg!("For vacancy title wasn't found, error: {}", err);}
+                    Err(err)=>{println!("For vacancy title wasn't found, error: {}", err);}
                 }
             },
             Err(err)=>{
@@ -59,7 +62,7 @@ impl Vacancy {
         }
     }
 
-    pub async fn click_respond(&self) -> bool{
+    pub async fn click_respond(&self) -> bool {
         if self.respond_button.is_some(){
             let button = self.respond_button.as_ref().unwrap();
             let _ = button.wait_until().clickable().await;
@@ -89,7 +92,7 @@ impl Vacancy {
                 return title_text.clone()
             },
             None => {
-                return "".to_string();
+                return String::new();
             }
         }
     }

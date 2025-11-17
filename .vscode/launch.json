@@ -14,7 +14,13 @@
                     "--bin=hh_bot"
                 ]
             },
-            "args": []
+            "args": [
+                "--target_url",
+                "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line",
+                
+                //"--headless_mode"
+
+            ]
         },
         {
             "name": "Debug unit tests in executable 'hh_bot'",

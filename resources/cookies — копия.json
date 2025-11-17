@@ -1,0 +1,442 @@
+[
+  {
+    "name": "__ddg8_",
+    "value": "ofz343zOtGxlvMxi",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1763395145,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "fgsscgib-w-hh",
+    "value": "bPJQff1bcd3ae4ac12b33bda115519f17f16850a",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1794929944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "regions",
+    "value": "1815",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1794929944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__ddg10_",
+    "value": "1763393929",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1763395145,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ym_visorc",
+    "value": "b",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1763395738,
+    "sameSite": "None"
+  },
+  {
+    "name": "__zzatgib-w-hh",
+    "value": "MDA0dC0jViV+FmELHw4/aQsbSl1pCENQGC9LX3pdbh9OHHheU0paUnxXTkQxbFYLCBRhPnNzeClsIyRgOVURCxIXRF5cVWl1FRpLSiVueCplJS0xViR8SylEXFN8KCIUCG4rUQ4MVy8NPjteLW8PJwsSWAkhCklpC15zXV8WPkQhbAs4LBtFOA8teB1keEdXaypKFX1uWAkLQWBFcil7Mm9sUmJJXFB4VVE1LiAXMHMkUH9AYkNKcXQbN1ddHBEkWA4hPwsXXFU+NVQOPHVXLw0uOF4tbx5mTVwiTFhWfC0bGHhnFRtQSxgvS18zWn4lDzRDS1sKFA4/VFFCQisVWVJ1KW59OjAbRVceY0thIkdZUAgXFXs/KGUaQE4nL0tfPm16L04efEsbNSEOPloLG3hyKVIKFF5GRHV1MDxhDysYIVQ1Xz9BYUpKPTdYH0t1MBI=m6jOMg==",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1794929938,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_hi",
+    "value": "144834437",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__ddg1_",
+    "value": "glV9SeIhsV3uVFdQTTDE",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1794269837,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "tmr_detect",
+    "value": "0%7C1763393940400",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1763480340,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "hhrole",
+    "value": "applicant",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uxs_uid",
+    "value": "d783ff80-c3be-11f0-9fc1-d3731116b352",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1797948487,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "web_push_confirm_reason",
+    "value": "response",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1763417525,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "tmr_lvid",
+    "value": "5115ed119c2a998a4c67baa60c57732b",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1792165135,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__ddg9_",
+    "value": "109.197.253.225",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1763395145,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "device_breakpoint",
+    "value": "s",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1764603536,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "display",
+    "value": "desktop",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "tmr_detect",
+    "value": "0%7C1763388531402",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1763474931,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "cookie_policy_agreement",
+    "value": "true",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1768092836,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ym_uid",
+    "value": "1762733840461522626",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1794269839,
+    "sameSite": "None"
+  },
+  {
+    "name": "domain_sid",
+    "value": "r9beHKzPNHBPJIyBWiLZv%3A1763393921219",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1763998721,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "crypted_id",
+    "value": "A82A61391BF39E0045E39ABA6EC3CF94A5471C6F722104504734B32F0D03E9F8",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "iap.uid",
+    "value": "ee3d98dfce254192898056769f590608",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1797293838,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "crypted_hhuid",
+    "value": "5D1689E49435958F97A90BDBA656B14695E008366565F3521644CAC9DF3AA9BF",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "device_magritte_breakpoint",
+    "value": "s",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1764598129,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ym_d",
+    "value": "1762733840",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1794269839,
+    "sameSite": "None"
+  },
+  {
+    "name": "gsscgib-w-hh",
+    "value": "a8y/84ejkkuzpLaxKUK0ihHst+YMm9vHEdFb1shx/k1lHXOBhlVjbE5OSAu18+6plHWBFU9iiyu/zJE1B82JMGpiaLSjylduWbs77P6DRh1Jtpy8Pr8PVrxWgBrzcDkKJ8NRx0ZpKPw2mpPT8cHzhmbJblGk71TueF+d1w7rnXGewj/my9xjYMXClwoARJ6yMCbbrC1tYba2IuL0cgbrOdE5Pt/4rTnObp08fXWOGcnqg0UlR4akv234LlL9/i1MsOyAM6C6y/3wONvPAcg=",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1794929944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "cfidsgib-w-hh",
+    "value": "eXkJShFD0/sIBYXF0h7Yo2l6xwjcplDL0vLUdl49Uer2Sz1moUKApby20P2WJUChzSTS0TgageEn+NFU0WLFR7rGj5jwTswsFnsLPHoYkcvF+5h1Khc0WvZVJDxUP5GfSzNFUc3re4ba91upBQrTxofzPZiHNcCJuErb",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1794929939,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "fgsscgib-w-hh",
+    "value": "bPJQff1bcd3ae4ac12b33bda115519f17f16850a",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1794929944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "regions",
+    "value": "\"\"",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1794272854,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "gsscgib-w-hh",
+    "value": "a8y/84ejkkuzpLaxKUK0ihHst+YMm9vHEdFb1shx/k1lHXOBhlVjbE5OSAu18+6plHWBFU9iiyu/zJE1B82JMGpiaLSjylduWbs77P6DRh1Jtpy8Pr8PVrxWgBrzcDkKJ8NRx0ZpKPw2mpPT8cHzhmbJblGk71TueF+d1w7rnXGewj/my9xjYMXClwoARJ6yMCbbrC1tYba2IuL0cgbrOdE5Pt/4rTnObp08fXWOGcnqg0UlR4akv234LlL9/i1MsOyAM6C6y/3wONvPAcg=",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1794929939,
+    "sameSite": "None"
+  },
+  {
+    "name": "domain_sid",
+    "value": "e0GHrLVOVTJpYTgcHnhA7%3A1763388487890",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1763993287,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "device_breakpoint",
+    "value": "s",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1764598127,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "hhtoken",
+    "value": "4kNhcJM0DAQqb5!aeJP9IP!LcMIR",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1797294031,
+    "sameSite": "None"
+  },
+  {
+    "name": "hhul",
+    "value": "490fd62951b0fa5614a9a87df0a15a7e3b0c9dab1f63699437dac94c31a3b01d",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1797953944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "tmr_lvidTS",
+    "value": "1762733839688",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1792165135,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "cfidsgib-w-hh",
+    "value": "eXkJShFD0/sIBYXF0h7Yo2l6xwjcplDL0vLUdl49Uer2Sz1moUKApby20P2WJUChzSTS0TgageEn+NFU0WLFR7rGj5jwTswsFnsLPHoYkcvF+5h1Khc0WvZVJDxUP5GfSzNFUc3re4ba91upBQrTxofzPZiHNcCJuErb",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": true,
+    "expiry": 1794929939,
+    "sameSite": "None"
+  },
+  {
+    "name": "__zzatgib-w-hh",
+    "value": "MDA0dC0jViV+FmELHw4/aQsbSl1pCENQGC9LX3pdbh9OHHheU0paUnxXTkQxbFYLCBRhPnNzeClsIyRgOVURCxIXRF5cVWl1FRpLSiVueCplJS0xViR8SylEXFN8KCIUCG4rUQ4MVy8NPjteLW8PJwsSWAkhCklpC15zXV8WPkQhbAs4LBtFOA8teB1keEdXaypKFX1uWAkLQWBFcil7Mm9sUmJJXFB4VVE1LiAXMHMkUH9AYkNKcXQbN1ddHBEkWA4hPwsXXFU+NVQOPHVXLw0uOF4tbx5mTVwiTFhWfC0bGHhnFRtQSxgvS18zWn4lDzRDS1sKFA4/VFFCQisVWVJ1KW59OjAbRVceY0thIkdZUAgXFXs/KGUaQE4nL0tfPm16L04efEsbNSEOPloLG3hyKVIKFF5GRHV1MDxhDysYIVQ1Xz9BYUpKPTdYH0t1MBI=m6jOMg==",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1794929938,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "total_searches",
+    "value": "381",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "display",
+    "value": "desktop",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_xsrf",
+    "value": "3b827557c89346cfd2cd3be083d98d29",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_hi",
+    "value": "144834437",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uxs_uid",
+    "value": "7e3475b0-c3cb-11f0-b6f9-77fbc1b0e228",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1797953921,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ym_isad",
+    "value": "2",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1763401012,
+    "sameSite": "None"
+  },
+  {
+    "name": "GMT",
+    "value": "3",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "region_clarified",
+    "value": "NOT_SET",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1794269837,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "hhuid",
+    "value": "dLJvI_Y3vTUeJGkRLwcotQ--",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1797953945,
+    "sameSite": "None"
+  },
+  {
+    "name": "device_magritte_breakpoint",
+    "value": "s",
+    "path": "/",
+    "domain": "tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1764603538,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "gsscgib-w-hh",
+    "value": "a8y/84ejkkuzpLaxKUK0ihHst+YMm9vHEdFb1shx/k1lHXOBhlVjbE5OSAu18+6plHWBFU9iiyu/zJE1B82JMGpiaLSjylduWbs77P6DRh1Jtpy8Pr8PVrxWgBrzcDkKJ8NRx0ZpKPw2mpPT8cHzhmbJblGk71TueF+d1w7rnXGewj/my9xjYMXClwoARJ6yMCbbrC1tYba2IuL0cgbrOdE5Pt/4rTnObp08fXWOGcnqg0UlR4akv234LlL9/i1MsOyAM6C6y/3wONvPAcg=",
+    "path": "/",
+    "domain": ".tutayev.hh.ru",
+    "secure": false,
+    "expiry": 1794929944,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "cfidsgib-w-hh",
+    "value": "eXkJShFD0/sIBYXF0h7Yo2l6xwjcplDL0vLUdl49Uer2Sz1moUKApby20P2WJUChzSTS0TgageEn+NFU0WLFR7rGj5jwTswsFnsLPHoYkcvF+5h1Khc0WvZVJDxUP5GfSzNFUc3re4ba91upBQrTxofzPZiHNcCJuErb",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": false,
+    "expiry": 1794929939,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "redirect_host",
+    "value": "tutayev.hh.ru",
+    "path": "/",
+    "domain": ".hh.ru",
+    "secure": true,
+    "expiry": 1794269837,
+    "sameSite": "Lax"
+  }
+]

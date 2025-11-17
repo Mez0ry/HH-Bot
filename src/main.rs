@@ -1,5 +1,8 @@
+use std::sync::Arc;
+
+use clap::{Arg, Command};
+
 use thirtyfour::{prelude::*};
-extern crate num_cpus;
 
 pub mod cookie_manager;
 pub mod vacancy;
@@ -9,16 +12,50 @@ pub mod selector_manager;
 pub mod page;
 pub mod retry;
 
+
 use crate::{cookie_manager::CookieManager, page::{Page, PageProcessState}, selector_manager::SelectorManager};
 
-type ThirtyFourError = thirtyfour::error::WebDriverError; // Исправили тип ошибки
+type ThirtyFourError = thirtyfour::error::WebDriverError; 
 
 #[tokio::main]
 async fn main() -> Result<(), ThirtyFourError> {
+
+    let matches = Command::new("HHBot")
+        .version("1.0")
+        .author("Mez0ry mez0ry@mail.ru")
+        .about("Accepts a target URL as an argument")
+        .arg(
+            Arg::new("target_url")
+            .long("target_url")
+            .value_name("URL")
+            .help("Sets the target URL")
+            .required(true),
+        )
+        .arg(
+            Arg::new("headless_mode")
+            .long("headless_mode")
+            .value_name("mode")
+            .help("if true runs browser in headless mode")
+            .action(clap::ArgAction::SetTrue)
+            .required(false)
+        )
+        .get_matches();
+    
+    let mut target_url : &String = &String::new();
+
+    if let Some(target_url_arg) = matches.get_one::<String>("target_url") {
+        target_url = target_url_arg;
+        println!("Setting up target url: {}", target_url);
+    }
+
     let mut caps = DesiredCapabilities::chrome();
 
-    //caps.add_arg("--headless")?;
     
+    if matches.get_flag("headless_mode"){
+        caps.add_arg("--headless")?;
+        println!("Setting up headless mode");
+    }
+
     caps.add_arg("--enable-debugger-agent")?;
     caps.add_arg("--remote-debugging-port=9222")?;
     caps.add_arg("--no-sandbox")?;
@@ -40,26 +77,21 @@ async fn main() -> Result<(), ThirtyFourError> {
     caps.add_arg("--log-level=3")?;
     caps.add_arg("--enable-unsafe-swiftshader")?;
     
-    let driver = WebDriver::new("http://localhost:64904", caps).await?;
+    let driver: Arc<WebDriver> = Arc::new(WebDriver::new("http://localhost:64187", caps).await?);
 
-    let target_url : String = "https://hh.ru/search/vacancy?text=%D0%9F%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%81%D1%82+C%2B%2B&salary=&ored_clusters=true&enable_snippets=true&hhtmFrom=vacancy_search_list&hhtmFromLabel=vacancy_search_line".to_string();
-
-    driver.goto(&target_url).await?;
+    driver.goto(target_url).await?;
     
-    let cookie_json_path: String = String::from("./resources/cookies.json");
+    let cookie_json: &'static str = &"./resources/cookies.json";
 
-    if CookieManager::load_cookies(&cookie_json_path, &driver).await{
+    if CookieManager::load_cookies(&cookie_json, driver.clone()).await{
         println!("Successfully parsed and applied cookies");
-        driver.goto(&target_url).await?;
+        driver.goto(target_url).await?;
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     }
 
     let _ = SelectorManager::load_selectors("./resources/selectors.json").await;
-
-    let cores_amount = num_cpus::get();
-    println!("Cpu cores: {}", cores_amount);
     
-    let mut page = Page::new(target_url, &driver);
+    let mut page = Page::new(target_url.clone(), driver.clone());
     
     match page.process_page().await{
         PageProcessState::GatheringVacancies =>{
@@ -76,11 +108,11 @@ async fn main() -> Result<(), ThirtyFourError> {
         },
     }
 
-    CookieManager::save_cookies(cookie_json_path, driver.get_all_cookies().await?).await?;
+    CookieManager::save_cookies(&cookie_json, driver.get_all_cookies().await?).await?;
 
     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
-    driver.quit().await?;
-
+    <thirtyfour::WebDriver as Clone>::clone(&driver).quit().await?;
+    
     Ok(())
 }

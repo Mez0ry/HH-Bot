@@ -1,13 +1,16 @@
+use std::{pin::Pin, sync::Arc};
+
 use thirtyfour::{error::WebDriverErrorInfo, prelude::*};
 use crate::{retry, selector::MySelector};
 
-pub struct ElementAction<'a> {
-    driver: &'a WebDriver,
+#[derive(Clone)]
+pub struct ElementAction {
+    driver: Arc<WebDriver>,
     selector : MySelector
 }
 
-impl<'a> ElementAction<'a> {
-    pub fn new(driver: &'a WebDriver, my_selector: MySelector ) -> Self {
+impl ElementAction {
+    pub fn new(driver: Arc<WebDriver>, my_selector: MySelector ) -> Self {
         ElementAction { driver : driver, selector : my_selector}
     }
 
@@ -70,36 +73,68 @@ impl<'a> ElementAction<'a> {
         }
     }
 
-    pub async fn try_exists(action: &ElementAction<'_>, retries: u32) -> bool {
-        return retry::retry_on_err(async |attempt : u32| {
-            match action.exists().await {
-                Ok(stream) => return stream,
-                Err(_) => {
-                    println!("element doesnt exists, attempt {}", attempt);
-                    if attempt < retries {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    pub async fn try_exists(action: &Arc<ElementAction>, retries: u32) -> bool {
+        match retry::retry_on_err(
+            |attempt| {
+                let retries = retries;
+                Box::pin({
+                let value = action.clone();
+                async move {
+                    match value.exists().await {
+                        Ok(is_exists) => {
+                            Ok(is_exists)
+                        }
+                        Err(_) => {
+                            println!("element doesn't exist, attempt {}", attempt);
+
+                            if attempt < retries {
+                                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                            }
+
+                            return Err("element doesn't exist".to_string());
+                        }
                     }
-                    false
                 }
-            }
-        }, retries).await;
+                }) as Pin<Box<dyn Future<Output = Result<bool, String>> + Send + 'static>>
+            },
+            retries,
+        ).await {
+            Ok(is_exists) => {
+               return is_exists;
+            }, 
+            Err(_) => false,
+        }
     }
 
-    pub async fn try_safe_click(action: &ElementAction<'_>, retries: u32) -> bool{
-        return retry::retry_on_err(async |attempt : u32| {
-            match action.safe_click().await {
-                Ok(_) => return true,
-                Err(_) => {
-                    println!("safe_click attempt {}", attempt);
-                    
-                    if attempt < retries {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                    }
+    pub async fn try_safe_click(action: &Arc<ElementAction>, retries: u32) -> bool{
+        match retry::retry_on_err(
+            |attempt| {
+                let retries = retries;
+                Box::pin({
+                let cloned_action = action.clone();
+                async move {
+                    match cloned_action.safe_click().await {
+                        Ok(_) => return Ok(true),
+                        Err(_) => {
+                            println!("safe_click attempt {}", attempt);
+                            
+                            if attempt < retries {
+                                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                            }
 
-                    false
+                            Err("element doesn't exist".to_string())
+                        }
+                    }
                 }
-            }
-        }, retries).await;
+                }) as Pin<Box<dyn Future<Output = Result<bool, String>> + Send + 'static>>
+            },
+            retries,
+        ).await {
+            Ok(is_safe_clicked) => {
+               return is_safe_clicked;
+            }, 
+            Err(_) => false,
+        }
     }
 
     async fn find_element(&self) -> WebDriverResult<WebElement>{

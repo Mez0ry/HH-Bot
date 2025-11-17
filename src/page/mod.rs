@@ -1,4 +1,4 @@
-use std::{collections::HashSet};
+use std::{collections::HashSet, sync::Arc};
 use thirtyfour::{WebDriver, prelude::ElementWaitable};
 
 use crate::{element_action::ElementAction, selector_manager::SelectorManager, vacancy::Vacancy};
@@ -10,8 +10,8 @@ use crate::{element_action::ElementAction, selector_manager::SelectorManager, va
  * @brief probably will require fields such as elements_on_page, elements to skip
  * @TODO
  */
-pub struct Page<'a> {
-    driver: &'a  WebDriver,
+pub struct Page{
+    driver: Arc<WebDriver>,
     processed_vacancies: HashSet<String>,
     target_url: String,
 
@@ -49,16 +49,17 @@ pub enum GatheringInfo{
     DriverError
 }
 
-impl<'a> Page<'a> {
-    pub fn new(target_url : String, driver : &'a WebDriver) -> Self {
+impl Page{
+    pub fn new(target_url : String, driver : Arc<WebDriver>) -> Self {
         Page {target_url : target_url, driver: driver, processed_vacancies: HashSet::new(), vacancies_on_page: 49, vacancies_to_skip: 0 }
     }
 
     async fn process_vacancy(&mut self, vacancy: &Vacancy) -> Result<ProcessingInfo, ProcessingError> {
         println!("Processing vacancy: title: {}", vacancy.get_title().await);
 
-        let limit_check = ElementAction::new(&self.driver, SelectorManager::find_selector("vacancy_limit_reached").await);
+        let limit_check: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("vacancy_limit_reached").await).into();
         if ElementAction::try_exists(&limit_check, 3).await{
+            println!("limit reached");
             return Err(ProcessingError::LimitReached);
         }
 
@@ -82,30 +83,30 @@ impl<'a> Page<'a> {
 
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let relocation_popup = ElementAction::new(&self.driver, SelectorManager::find_selector("relocation_warning_confirm").await);
+        let relocation_popup: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("relocation_warning_confirm").await).into();
         if ElementAction::try_exists(&relocation_popup, 2).await {
             ElementAction::try_safe_click(&relocation_popup, 2).await;
         }
 
-        let accept_cookies = ElementAction::new(&self.driver, SelectorManager::find_selector("accept_cookies").await);
+        let accept_cookies: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("accept_cookies").await).into();
         if ElementAction::try_exists(&accept_cookies, 2).await {
             ElementAction::try_safe_click(&accept_cookies, 2).await;
         }
 
-        let submit_button = ElementAction::new(&self.driver, SelectorManager::find_selector("submit_button").await);
+        let submit_button: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("submit_button").await).into();
         if ElementAction::try_exists(&submit_button, 2).await {
             ElementAction::try_safe_click(&submit_button, 2).await;
 
-            let response_letter_toggle = ElementAction::new(&self.driver, SelectorManager::find_selector("response_letter_toggle").await);
+            let response_letter_toggle: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("response_letter_toggle").await).into();
             if ElementAction::try_exists(&response_letter_toggle, 2).await {
                 ElementAction::try_safe_click(&response_letter_toggle, 2).await;
 
-                let response_letter_form_input = ElementAction::new(&self.driver, SelectorManager::find_selector("response_letter_form_input").await);
+                let response_letter_form_input: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("response_letter_form_input").await).into();
                 if ElementAction::try_exists(&response_letter_form_input, 2).await{
                     ElementAction::try_safe_click(&response_letter_form_input, 2).await;
                     response_letter_form_input.send_keys("test".to_string()).await;
 
-                    let submit_button = ElementAction::new(&self.driver, SelectorManager::find_selector("submit_button").await);
+                    let submit_button: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("submit_button").await).into();
                     if ElementAction::try_exists(&submit_button, 2).await{
                         ElementAction::try_safe_click(&submit_button, 2).await;
                     }
@@ -239,7 +240,7 @@ impl<'a> Page<'a> {
 
     async fn move_to_next_page_if_any(&mut self, vacancies_out: &mut Vec<Vacancy>){
       
-        let page_next = ElementAction::new(&self.driver, SelectorManager::find_selector("next_page").await);
+        let page_next: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("next_page").await).into();
         if ElementAction::try_exists(&page_next, 3).await{
             ElementAction::try_safe_click(&page_next,3).await;
             tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;

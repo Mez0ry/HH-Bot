@@ -1,5 +1,5 @@
 use std::{sync::{Arc, OnceLock}};
-use thirtyfour::By;
+use thirtyfour::{By, WebDriver};
 /**
  * @TODO implement mechanism of waiting until selectors are loaded in multithreading enviroment
  */
@@ -35,11 +35,11 @@ impl SelectorManager {
         Ok(())
     }
 
-   pub async fn find_selector(selector_name: &str) -> MySelector{
+   pub async fn find_selector<S: AsRef<str>>(selector_name: S) -> MySelector{
         match GLOBAL_SELECTORS.get() {
             Some(selectors) => {
                 for s in selectors.iter() {
-                    if s.get_name() == selector_name {
+                    if s.get_name() == selector_name.as_ref() {
                         return s.clone();
                     }
                 }
@@ -51,8 +51,8 @@ impl SelectorManager {
         }
     }
 
-    pub async fn find_selector_as_action<'a>(driver : &'a thirtyfour::WebDriver, selector_name: &'a str) -> Option<ElementAction<'a>>{
-        Some(element_action::ElementAction::new(driver, Self::find_selector(selector_name).await))
+    pub async fn find_selector_as_action(driver : Arc<WebDriver>, selector_name: String) -> Option<ElementAction>{
+        Some(element_action::ElementAction::new(driver.clone(), Self::find_selector(selector_name.clone()).await))
     }
 
 }
