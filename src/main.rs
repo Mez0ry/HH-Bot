@@ -81,7 +81,7 @@ async fn main() -> Result<(), ThirtyFourError> {
 
     driver.goto(target_url).await?;
     
-    let cookie_json: &'static str = &"./resources/cookies.json";
+    let cookie_json: &'static str = &"./resources/user/cookies.json";
 
     if CookieManager::load_cookies(&cookie_json, driver.clone()).await{
         println!("Successfully parsed and applied cookies");
