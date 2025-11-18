@@ -108,7 +108,7 @@ impl CookieManager {
         const DELAY_BETWEEN_ATTEMPTS_MILLIS: u64 = 2000;
         let mut login_once: bool = false;
         
-        retry::retry_on_err(|attempt| {
+        retry::retry_on_err(|attempt| -> Pin<Box<dyn Future<Output = Result<Option<Vec<Cookie>>, WebDriverError>> + Send + 'static>> {
             let cloned_driver = driver.clone();
                 Box::pin(async move {
                     let chat_activator_button = element_action::ElementAction::new(cloned_driver.clone(),SelectorManager::find_selector("chat_activator_button").await,).into();
@@ -148,10 +148,8 @@ impl CookieManager {
                                     CookieManager::save_cookies(path, cookies.clone()).await?;
                                     return Ok(Some(cookies));
                                 }
-
                                 login_once = true;
-                            } else if !ElementAction::try_exists(&login_button, 3).await
-                                && !cloned_driver.current_url().await?.to_string().contains("login")
+                            } else if !ElementAction::try_exists(&login_button, 3).await && !cloned_driver.current_url().await?.to_string().contains("login")
                             {
                                 let cookies = cloned_driver.get_all_cookies().await?;
 

@@ -1,8 +1,9 @@
-use std::sync::Arc;
+use std::{path::{PathBuf}, sync::Arc};
 
 use clap::{Arg, Command};
 
 use thirtyfour::{prelude::*};
+use tokio::fs::{self};
 
 pub mod cookie_manager;
 pub mod vacancy;
@@ -39,6 +40,14 @@ async fn main() -> Result<(), ThirtyFourError> {
             .action(clap::ArgAction::SetTrue)
             .required(false)
         )
+        .arg(
+            Arg::new("stealth_mode")
+            .long("stealth_mode")
+            .value_name("mode")
+            .help("if true runs headless browser in a way that it hides that it was ran in headless mode")
+            .action(clap::ArgAction::SetTrue)
+            .required(false)
+        )
         .get_matches();
     
     let mut target_url : &String = &String::new();
@@ -53,8 +62,37 @@ async fn main() -> Result<(), ThirtyFourError> {
     
     if matches.get_flag("headless_mode"){
         caps.add_arg("--headless")?;
-        println!("Setting up headless mode");
+        println!("Headless mode: enabled");
     }
+    
+    caps.add_arg("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")?;
+    
+    if matches.get_flag("stealth_mode"){
+
+        let shared_profile_dir_path = std::path::Path::new("./resources/user/shared_profile");
+
+        if !shared_profile_dir_path.exists(){
+            fs::create_dir_all(shared_profile_dir_path).await?;
+        }
+
+        let path = fs::canonicalize(PathBuf::from("./resources/user/shared_profile")).await?;
+        
+        let mut user_data_dir = "--user-data-dir=".to_string();
+        
+        if let Some(actual_path) = path.to_str() {
+            let cleaned_path = if actual_path.starts_with(r#"\\?\"#) {
+                &actual_path[4..]
+            } else {
+                actual_path
+            };
+            user_data_dir.push_str(cleaned_path);
+        }
+        
+        caps.add_arg(&user_data_dir)?;
+    }
+
+    caps.add_arg("--hide-scrollbars")?;
+    caps.add_arg("--mute-audio")?;
 
     caps.add_arg("--enable-debugger-agent")?;
     caps.add_arg("--remote-debugging-port=9222")?;
@@ -77,9 +115,31 @@ async fn main() -> Result<(), ThirtyFourError> {
     caps.add_arg("--log-level=3")?;
     caps.add_arg("--enable-unsafe-swiftshader")?;
     
-    let driver: Arc<WebDriver> = Arc::new(WebDriver::new("http://localhost:64187", caps).await?);
-
+    let driver: Arc<WebDriver> = Arc::new(WebDriver::new("http://localhost:53609", caps).await?);
+    
     driver.goto(target_url).await?;
+
+    if matches.get_flag("stealth_mode"){
+        let _ = driver.execute(r#"Object.defineProperty(navigator, 'webdriver', {
+                                    get: () => undefined
+                                    });
+                                    "#,Vec::new()).await;
+    
+        let _ = driver.execute(r"Intl.DateTimeFormat = () => ({resolvedOptions: () => ({timeZone: 'America/New_York'})})", Vec::new()).await;
+    
+        let _ = driver.execute(r#"
+                                    Object.defineProperty(navigator, 'webdriver', {
+                                    get: () =&gt; undefined
+                                    });
+                                    Object.defineProperty(navigator, 'languages', {
+                                    get: () =&gt; ['en-US', 'en']
+                                    });
+                                    Object.defineProperty(navigator, 'plugins', {
+                                    get: () =&gt; [1, 2, 3]
+                                    });
+                                    "#, Vec::new()).await;
+        println!("Stealth mode enabled");
+    }
     
     let cookie_json: &'static str = &"./resources/user/cookies.json";
 

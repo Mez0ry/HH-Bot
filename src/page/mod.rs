@@ -59,7 +59,6 @@ impl Page{
 
         let limit_check: Arc<ElementAction> = ElementAction::new(self.driver.clone(), SelectorManager::find_selector("vacancy_limit_reached").await).into();
         if ElementAction::try_exists(&limit_check, 3).await{
-            println!("limit reached");
             return Err(ProcessingError::LimitReached);
         }
 

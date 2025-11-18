@@ -1,0 +1,4 @@
+2025/11/18-16:56:17.891 3b3c Reusing MANIFEST C:\Users\aleks\source\rust_vscode\hh_bot\resources\user\shared_profile\Default\IndexedDB\https_tutayev.hh.ru_0.indexeddb.leveldb/MANIFEST-000001
+2025/11/18-16:56:17.891 3b3c Recovering log #7
+2025/11/18-16:56:17.891 3b3c Reusing old log C:\Users\aleks\source\rust_vscode\hh_bot\resources\user\shared_profile\Default\IndexedDB\https_tutayev.hh.ru_0.indexeddb.leveldb/000007.log 
+2025/11/18-16:56:17.924 3f94 Manual compaction at level-0 from '\x00\x14\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x15\x00\x00\x00' @ 0 : 0; will stop at (end)
